@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_new_record_data" extends="interceptors" namespace="/">
+		<default-interceptor-ref name="stack_check_user"></default-interceptor-ref>
+		<action name="initListNewRecordData" class="com.helphand.ccdms.actions.manage_new_record_data" method="init_list_record_data">
+			<result>/pages/manage_new_record_data.html</result>
+		</action>
+		 <action name="listNewRecordData" class="com.helphand.ccdms.actions.manage_new_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action> 
+		
+		<action name="auditionNewRecordData" class="com.helphand.ccdms.actions.manage_new_record_data" method="audition_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="downloadNewRecordData" class="com.helphand.ccdms.actions.manage_new_record_data" method="download_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="initListNewRecordDataJiangxiCailing" class="com.helphand.ccdms.actions.manage_new_record_data" method="init_list_record_data">
+			<result>/pages/manage_new_record_data_jiangxi_cailing.html</result>
+		</action>
+		<action name="listNewRecordDataJiangxiCailing" class="com.helphand.ccdms.actions.manage_new_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="initListNewRecordDataGuizhouCailing" class="com.helphand.ccdms.actions.manage_new_record_data" method="init_list_record_data">
+			<result>/pages/manage_new_record_data_guizhou_cailing.html</result>
+					 
+		</action>	  
+		<action name="listNewRecordDataGuizhouCailing" class="com.helphand.ccdms.actions.manage_new_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		
+		<action name="initListNewRecordDataHaipuCallout" class="com.helphand.ccdms.actions.manage_new_record_data" method="init_list_record_data">
+			<result>/pages/manage_new_record_data_haipu_callout.html</result>
+		</action>
+		<action name="listNewRecordDataHaipuCallout" class="com.helphand.ccdms.actions.manage_new_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="initListNewRecordDataRenbaoCallout" class="com.helphand.ccdms.actions.manage_new_record_data" method="init_list_record_data">
+			<result>/pages/manage_new_record_data_renbao_callout.html</result>
+		</action>	
+		<action name="listNewRecordDataRenbaoCallout" class="com.helphand.ccdms.actions.manage_new_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		
+		
+		<action name="initNewListRecordDataGanzhouCallout" class="com.helphand.ccdms.actions.manage_new_record_data" method="init_list_record_data">
+			<result>/pages/manage_new_record_data_ganzhou_callout.html</result>
+		</action>
+		<action name="listNewRecordDataGanzhouCallout" class="com.helphand.ccdms.actions.manage_new_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+	</package>
+</struts>

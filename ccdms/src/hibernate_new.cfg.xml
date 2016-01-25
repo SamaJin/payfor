@@ -1,0 +1,47 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+	"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+	<session-factory>
+		<!-- Platforms -->
+		<property name="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</property>
+		<property name="hibernate.connection.driver_class">oracle.jdbc.driver.OracleDriver</property>
+		<property name="hibernate.connection.url">jdbc:oracle:thin:@172.1.1.9:1521:petra</property>
+		<property name="hibernate.connection.username">petra</property>
+		<property name="hibernate.connection.password">suntek</property>
+		<!-- C3P0 Connection Pool -->
+		<property name="hibernate.connection.provider_class">org.hibernate.c3p0.internal.C3P0ConnectionProvider</property>
+		<property name="hibernate.c3p0.min_size">1</property>
+		<property name="hibernate.c3p0.max_size">15</property>
+		<property name="hibernate.c3p0.max_statements">50</property>
+		<property name="hibernate.c3p0.timeout">300</property>
+		<property name="hibernate.c3p0.validate">true</property>
+		<property name="hibernate.c3p0.idle_test_period">3000</property>
+		<property name="hibernate.c3p0.testConnectionOnCheckout">true</property>
+		<!-- Miscellaneous Settings -->
+		<property name="hibernate.show_sql">false</property>
+		<property name="hibernate.hbm2ddl.auto">update</property>
+		<!-- mappings -->
+		<mapping class="com.helphand.ccdms.tables.admin_user_authority" />
+		<mapping class="com.helphand.ccdms.tables.admin_module" />
+		<mapping class="com.helphand.ccdms.tables.admin_module_group" />
+		<mapping class="com.helphand.ccdms.tables.admin_module_group_describe" />
+		<mapping class="com.helphand.ccdms.tables.commons_records_list" />
+		<mapping class="com.helphand.ccdms.tables.recordfilelist" />
+		<mapping class="com.helphand.ccdms.tables.recording_check_result" />
+		<mapping class="com.helphand.ccdms.tables.recording_new_check_result" />
+		<mapping class="com.helphand.ccdms.tables.report_rule_item" />
+		<mapping class="com.helphand.ccdms.tables.report_rule" />
+		<mapping class="com.helphand.ccdms.tables.report_data" />
+		<mapping class="com.helphand.ccdms.tables.commons_callin_order_logs" />
+		<mapping class="com.helphand.ccdms.tables.system_tag_date" />
+		<mapping class="com.helphand.ccdms.tables.nitoce_user" />
+		<mapping class="com.helphand.ccdms.tables.system.log_sdr" />
+		<mapping class="com.helphand.ccdms.tables.system.log_sdr_his" />
+		<mapping class="com.helphand.ccdms.tables.system.jx_ds" />
+		<mapping class="com.helphand.ccdms.tables.notice_message" />
+		<mapping class="com.helphand.ccdms.tables.system.log_agentoperation"/>
+		<mapping class="com.helphand.ccdms.tables.system.stat_operation"/>
+	</session-factory>
+</hibernate-configuration>

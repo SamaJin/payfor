@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>   
+<project name="WebProj" default="war">  
+	<property name="build.dest" value="../build/classes"></property>
+    <path id="compile.classpath">  
+        <fileset dir="WebContent/WEB-INF/lib">  
+            <include name="*.jar"/>  
+        </fileset>  
+    </path>  
+      
+    <target name="init">  
+        <mkdir dir="${build.dest}"/>  
+    </target>  
+      
+    <target name="compile" depends="init" >  
+        <javac destdir="${build.dest}" debug="true" srcdir="src" encoding="utf-8">  
+            <classpath refid="compile.classpath"/>  
+        </javac>  
+    </target>  
+      
+    <target name="copy" depends="compile" description="配置文件拷贝">    
+        <javac srcdir="java/resource" destdir="${build.dest}">    
+            <classpath refid="classpath"/>    
+        </javac>    
+        <copy todir="${build.dest}">    
+            <fileset dir="java/resource">    
+                <include name="*"/>    
+            </fileset>    
+        </copy>    
+    </target>    
+      
+    <target name="war" depends="copy">  
+        <war destfile="ccdms.war" webxml="WebContent/WEB-INF/web.xml">  
+            <fileset dir="WebContent"/>  
+            <lib dir="WebContent/WEB-INF/lib"/>  
+            <classes dir="${build.dest}"/>  
+        </war>  
+    </target>  
+      
+    <target name="clean">  
+        <delete dir="build" />  
+    </target>  
+      
+</project>  

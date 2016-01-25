@@ -1,0 +1,1014 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all-gray.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/ccdms/js/timeout.js"></script>
+<script type="text/javascript">
+	var recording_check_result_store;
+	var window_modify_recording_check;
+	var admin_user_store;
+	var window_recheck_result;
+	var is_check = false;
+	var is_recheck = false;
+	var admin_user_id = 0;
+	
+	Ext.onReady(function() {
+		//权限--
+		Ext.Ajax.request({
+			url : '/ccdms/checkAndRecheck.do',
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					is_check = result.is_check;
+					is_recheck = result.is_recheck;
+					admin_user_id = result.admin_user_id;
+				}
+			}
+		});
+		
+		//--
+		Ext.define('model_admin_user', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'admin_user_name',
+				type : 'string',
+			} ]
+		});
+		admin_user_store = Ext.create('Ext.data.Store', {
+			model : 'model_admin_user',
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/listCheckAdminUser.do',
+				reader : {
+					type : 'json',
+					root : 'rows',
+				}
+			}
+		});
+		//---------------------------
+		Ext.define('model_check_result', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'agent_id',
+				type : 'string',
+			}, {
+				name : 'recording_time',
+				type : 'string',
+			}, {
+				name : 'origcaller',
+				type : 'string',
+			}, {
+				name : 'origcalled',
+				type : 'string',
+			}, {
+				name : 'caller',
+				type : 'string',
+			}, {
+				name : 'called',
+				type : 'string',
+			}, {
+				name : 'check_time',
+				type : 'string',
+			}, {
+				name : 'recording_type',
+				type : 'string',
+			}, {
+				name : 'call_type',
+				type : 'string',
+			}, {
+				name : 'call_leaf_type',
+				type : 'string',
+			}, {
+				name : 'error_type',
+				type : 'string',
+			}, {
+				name : 'check_type',
+				type : 'string',
+			}, {
+				name : 'check_result',
+				type : 'int',
+			}, {
+				name : 'result_describe',
+				type : 'string',
+			}, {
+				name : 'recheck_result',
+				type : 'string',
+			}, {
+				name : 'file_name',
+				type : 'string',
+			}, {
+				name : 'check_user_id',
+				type : 'int',
+			}, {
+				name : 'recheck_user_id',
+				type : 'int',
+			}, {
+				name : 'check_user_name',
+				type : 'string',
+			}, {
+				name : 'recheck_user_name',
+				type : 'string',
+			} ]
+		});
+		recording_check_result_store = Ext.create('Ext.data.Store', {
+			model : 'model_check_result',
+			autoLoad : false,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/listRecordingCheckResult.do',
+				actionMethods: {
+			        read : 'post'
+			    },
+				reader : {
+					type : 'json',
+					root : 'rows',
+					totalProperty : 'total'
+				}
+			}
+		});
+		//-------------------------------------------------------
+		var grid_recording_check = Ext.create('Ext.grid.Panel', {
+			store : recording_check_result_store,
+			columnLines : true,
+			rowLines : true,
+			loadMask : true,
+			columns : [{
+				text : '录音类型',
+				width : 60,
+				dataIndex : 'recording_type',
+			}, {
+				text : '质检用户',
+				dataIndex : 'check_user_name',
+			}, {
+				text : '抽检时间',
+				dataIndex : 'check_time',
+			}, {
+				text : '工号',
+				dataIndex : 'agent_id',
+				width : 60,
+			}, {
+				text : '录音时间',
+				dataIndex : 'recording_time',
+			}, {
+				text : '业务范围',
+				dataIndex : 'call_type',
+			}, {
+				text : '业务类型',
+				dataIndex : 'call_leaf_type',
+			}, {
+				text : '错误类型',
+				dataIndex : 'error_type',
+			}, {
+				text : '质检类型',
+				dataIndex : 'check_type',
+			}, {
+				text : '评分',
+				dataIndex : 'check_result',
+				width : 40,
+			}, {
+				text : '评语',
+				dataIndex : 'result_describe',
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					return "<a style='text-decoration: none;' href='#' title='"+ value +"'>"+ value +"</a>";
+				}
+			}, {
+				text : '复检',
+				width : 40,
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var result = "<font color='red'>否</font>";
+					if(record.data["recheck_result"] != "") {
+						result = "<a href='#' onclick='exec_recording_check_result("+ record.data["id"] +",3)'>是</a>";
+					}
+					return result;
+				}
+			}, {
+				text : '录音',
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = '';
+					str += '<a href="#" onClick="open_audition_record_window(\'' + record.data["file_name"] + '\')">试听</a>&nbsp;&nbsp;';
+					str += '<a href="#" onClick="action_download_record(\'' + record.data["file_name"] + '\')">下载</a>&nbsp;&nbsp;';
+					return str;
+				}
+			}, {
+				text : '操作',
+				align : 'right',
+				sortable : false,
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = "";
+					if(is_recheck) {
+						str += "<a href='#' onclick='exec_recording_check_result("+ record.data["id"] +",1)'>复检</a>&nbsp;&nbsp;";
+					}
+					if(is_check && record.data["recheck_result"] == "" && record.data["check_user_id"] == admin_user_id) {
+						str += "<a href='#' onclick='exec_recording_check_result("+ record.data["id"] +",0)'>修改</a>&nbsp;&nbsp;";
+						str += "<a href='#' onclick='exec_del_recording_check_result("+ record.data["id"] +")'>删除</a>&nbsp;&nbsp;";
+					}
+					if(str == "") {
+						str = "无&nbsp;&nbsp;";
+					}
+					return str;
+				}
+			} ],
+			bbar : Ext.create('Ext.toolbar.Paging', {
+				store : recording_check_result_store,
+				displayInfo : true,
+			}),
+			tbar : Ext.create('Ext.toolbar.Toolbar', {
+				defaults : {
+					labelAlign : 'right',
+					labelWidth : 50,
+					width : 150,
+				},
+				items : [ {
+					xtype : 'combo',
+					id : 'input_recording_type',
+					fieldLabel : '录音类型',
+					store : Ext.create('Ext.data.Store', {
+						fields : [ 'name', 'value' ],
+						data : [ 
+						    {"name" : "请选择","value" : ""}, 
+						    {"name" : "外呼","value" : "外呼"},
+						    {"name" : "呼入","value" : "呼入"} 
+						]
+					}),
+					displayField : 'name',
+					valueField : 'value',
+					width : 120,
+					editable : false,
+					value : "",
+					hidden : true,
+				}, {
+					xtype : 'combo',
+					id : 'input_check_user_id',
+					fieldLabel : '质检用户',
+					store : admin_user_store,
+					displayField : 'admin_user_name',
+					valueField : 'id',
+					queryMode: 'local',
+					value : -1,
+					listeners : {
+	                    beforequery : function(e){
+	                    	var combo = e.combo;
+	                		if(!e.forceAll){
+	                			var value = e.query;
+	                			combo.store.filterBy(function(record,id){
+	                				var text = record.get(combo.displayField);
+	                				return (text.indexOf(value)!=-1);
+	                			});
+	                			combo.expand();
+	                			return false;
+	                		}
+	                    }
+	                }
+				}, {
+					xtype : 'datefield',
+					id : 'input_start_time',
+					fieldLabel : '抽检时间',
+					format : 'Y-m-d',
+					selectOnFocus : true,
+					labelAlign : 'right',
+					width : 150,
+				}, {
+					xtype : 'datefield',
+					id : 'input_end_time',
+					fieldLabel : '至',
+					format : 'Y-m-d',
+					labelWidth : 15,
+					selectOnFocus : true,
+					labelAlign : 'right',
+					width : 120,
+				}, {
+					xtype : 'combo',
+					id : 'input_call_type',
+					fieldLabel : '业务范围',
+					store : Ext.create('Ext.data.Store', {
+						fields : [ 'name', 'value' ],
+						data : [ 
+						    {"name" : "江西彩铃","value" : "江西彩铃"}, 
+						    {"name" : "贵州彩铃","value" : "贵州彩铃"},
+						    {"name" : "人保外呼","value" : "人保外呼"} 
+						]
+					}),
+					displayField : 'name',
+					valueField : 'value',
+					hidden : true,
+				}, {
+					xtype : 'combo',
+					id : 'input_error_type',
+					fieldLabel : '差错类型',
+					store : Ext.create('Ext.data.Store', {
+						fields : [ 'name', 'value' ],
+						data : [ 
+						    {"name":"请选择", "value":""}, {"name":"无差错", "value":"无差错"}, 
+						    {"name":"非严重性差错", "value":"非严重性差错"}, {"name":"严重性差错", "value":"严重性差错"},
+						    {"name":"致命性差错", "value":"致命性差错"} 
+						]
+					}),
+					displayField : 'name',
+					valueField : 'value',
+					editable : false,
+					value : "",
+				}, {
+					xtype : 'textfield',
+					id : 'input_start_result',
+					fieldLabel : '评分',
+					labelWidth : 30,
+					width : 65,
+				}, {
+					xtype : 'textfield',
+					id : 'input_end_result',
+					fieldLabel : '至',
+					labelWidth : 15,
+					width : 50,
+				}, {
+					xtype : 'combo',
+					id : 'input_is_check',
+					fieldLabel : '复检',
+					store : Ext.create('Ext.data.Store', {
+						fields : [ 'name', 'value' ],
+						data : [ 
+						    {"name":"请选择", "value":""}, 
+						    {"name":"是", "value":"1"}, 
+						    {"name":"否", "value":"0"},
+						]
+					}),
+					displayField : 'name',
+					valueField : 'value',
+					editable : false,
+					labelWidth : 30,
+					width : 100,
+					value : "",
+				}, '->', {
+					text : '查询',
+					width : 50,
+					icon : '/ccdms/extui/resources/icons/magnifier.png',
+					handler : function() {
+						recording_check_result_store.on('beforeload', function(store) {
+							var check_user_text = Ext.getCmp("input_check_user_id").getRawValue();
+							var check_user_id = Ext.getCmp("input_check_user_id").value;
+							if(check_user_text == -1) check_user_id = null;
+							
+							Ext.apply(store.proxy.extraParams, {
+								'check_result.recording_type' : Ext.getCmp("input_recording_type").value,
+								'check_user_id' : check_user_id,
+								'start_time' : Ext.getCmp("input_start_time").getValue(),
+								'end_time' : Ext.getCmp("input_end_time").getValue(),
+								//'check_result.call_type' : Ext.getCmp("input_call_type").getValue(),
+								'check_result.call_type' : "江西彩铃",
+								'check_result.error_type' : Ext.getCmp("input_error_type").value,
+								'start_result' : Ext.getCmp("input_start_result").value,
+								'end_result' : Ext.getCmp("input_end_result").value,
+								'is_check' : Ext.getCmp("input_is_check").value,
+							});
+						});
+						recording_check_result_store.loadPage(1);
+						//recording_check_result_store.load();
+					}
+				}, {
+					text : '重置',
+					width : 50,
+					icon : '/ccdms/extui/resources/icons/arrow_rotate_clockwise.png',
+					handler : function() {
+						Ext.getCmp("input_recording_type").setValue('');
+						Ext.getCmp("input_check_user_id").setValue(-1);
+						Ext.getCmp("input_start_time").setValue('');
+						Ext.getCmp("input_end_time").setValue('');
+						Ext.getCmp("input_call_type").setValue('');
+						Ext.getCmp("input_error_type").setValue('');
+						Ext.getCmp("input_start_result").setValue('');
+						Ext.getCmp("input_end_result").setValue('');
+						Ext.getCmp("input_is_check").setValue('');
+					}
+				}, {
+					text : '导出',
+					width : 50,
+					icon : '/ccdms/extui/resources/icons/arrow_down.png',
+					handler : function() {
+						var recording_type = Ext.getCmp("input_recording_type").value;
+						if(recording_type == null) start_result = "";
+						
+						var check_user_text = Ext.getCmp("input_check_user_id").getRawValue();
+						var check_user_id = Ext.getCmp("input_check_user_id").value;
+						if(check_user_text == -1) check_user_id = "";
+						
+						var start_result = Ext.getCmp("input_start_result").value;
+						if(start_result == null) start_result = 0;
+						var end_result = Ext.getCmp("input_end_result").value;
+						if(end_result == null) end_result = 0;
+						var start_time = Ext.getCmp("input_start_time").getRawValue();
+						if(start_time == null) start_time = "";
+						var end_time = Ext.getCmp("input_end_time").getRawValue();
+						if(end_time == null) end_time = "";
+						//var call_type = Ext.getCmp("input_call_type").value;
+						//if(call_type == null) call_type = "";
+						var error_type = Ext.getCmp("input_error_type").value;
+						if(error_type == null) error_type = "";
+						var is_check = Ext.getCmp("input_is_check").value;
+						if(is_check == null) is_check = "";
+						
+						if(start_time != "")  start_time += "T00:00:00";
+						if(end_time != "")  end_time += "T23:59:59";
+						
+						var param = "";
+						param += "?check_result.recording_type="+encodeURI(encodeURI(recording_type));
+						param += "&check_user_id="+check_user_id;
+						param += "&start_time="+start_time;
+						param += "&end_time="+end_time;
+						param += "&check_result.call_type="+encodeURI(encodeURI("江西彩铃"));
+						param += "&check_result.error_type="+encodeURI(encodeURI(error_type));
+						param += "&start_result="+start_result;
+						param += "&end_result="+end_result;
+						param += "&is_check="+is_check;
+						
+						window.location.href = "/ccdms/downloadCheckResult.do"+param;
+					}
+				}],
+			}),
+		});
+		//--
+		var viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_recording_check ],
+		});
+	});
+	
+	//是否删除
+	function exec_del_recording_check_result(id) {
+		var question = "是否确定删除";
+		Ext.Msg.show({
+			title : '消息',
+			msg : question,
+			buttons : Ext.Msg.YESNO,
+			icon : Ext.Msg.QUESTION,
+			fn : function(result) {
+				if(result == "yes") {
+					ajax_del_recording_check_result(id);
+				}
+			}
+		});
+	}
+	//执行删除
+	function ajax_del_recording_check_result(id) {
+		Ext.Ajax.request({
+			url : '/ccdms/delRecordingCheckResult.do',
+			params : {
+				'check_result.id' : id,
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					recording_check_result_store.reload();
+					Ext.Msg.show({
+						title : '消息',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.INFO
+					});
+				}else {
+					Ext.Msg.show({
+						title : '错误',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.ERROR
+					});
+				}
+			}
+		});
+	}
+	
+	//获取质检信息
+	function exec_recording_check_result(id,status) {
+		Ext.Ajax.request({
+			url : '/ccdms/infoRecordingCheckResult.do',
+			params : {
+				'check_result.id' : id,
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					var bean = result.return_bean;
+					if(status == 1) {
+						open_recheck_result_window(bean);//复检
+					}else if(status == 3) {
+						open_recheck_info_window(bean);//查看复检
+					}else {
+						open_modify_check_result_window(bean);//修改
+					}
+				}else {
+					Ext.Msg.show({
+						title : '错误',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.ERROR
+					});
+				}
+			}
+		});
+	}
+	//修改质检信息窗口
+	function open_modify_check_result_window(bean) {
+		var call_type,recording_type,callout_call_type,callin_call_type;
+		
+		//--
+		if(bean.called == "07311255993") {
+			call_type = "江西彩铃"; recording_type = "呼入"; callin_call_type = bean.call_leaf_type;
+		}else if(bean.called == "12559980") {
+			call_type = "贵州彩铃"; recording_type = "呼入"; callin_call_type = bean.call_leaf_type;
+		}else if(bean.origcaller == "07319521251") {
+			call_type = "人保外呼"; recording_type = "外呼"; callout_call_type = bean.call_leaf_type;
+		}else { 
+			call_type = bean.call_type; recording_type = "外呼"; callout_call_type = bean.call_leaf_type;
+		}
+		//--
+		window_modify_recording_check = Ext.create('Ext.window.Window', {
+			title : '质检录音',
+			width : 500,
+			height : 350,
+			autoShow : true,
+			modal : true,
+			bodyPadding : 10,
+			buttonAlign : 'center',
+			layout : {
+				type: 'table',
+		        columns: 2,
+			},
+			defaults : {
+				labelWidth : 70,
+			},
+			items : [ {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;工号',
+				readOnly : true,
+				value : bean.agent_id,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;录音时间',
+				readOnly : true,
+				value : bean.recording_time,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;源主叫',
+				readOnly : true,
+				value : bean.origcaller,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;主叫',
+				readOnly : true,
+				value : bean.caller,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;源被叫',
+				readOnly : true,
+				value : bean.origcalled,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;被叫',
+				readOnly : true,
+				value : bean.called,
+			}, {
+				xtype : 'textfield',
+				id : 'form_recording_type',
+				fieldLabel : '&nbsp;&nbsp;录音类型',
+				readOnly : true,
+				value : recording_type,
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;业务范围',
+				id : 'form_call_type',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+					    {"name" : "江西彩铃","value" : "江西彩铃"}, 
+					    {"name" : "贵州彩铃","value" : "贵州彩铃"},
+					    {"name" : "人保外呼","value" : "人保外呼"} 
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				value : call_type,
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;业务类型',
+				id : 'form_callout_call_type',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+						{"name" : "江西铃音盒","value" : "江西铃音盒"}, 
+						{"name" : "九江铃音盒","value" : "九江铃音盒"}, 
+						{"name" : "贵州联通5元《掌上MBA》","value" : "贵州联通5元《掌上MBA》"},
+						{"name" : "江西环球时报","value" : "江西环球时报"},
+						{"name" : "宝鸡环球时报","value" : "宝鸡环球时报"}, 
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				value : callout_call_type,
+				hidden : false,
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;业务类型',
+				id : 'form_callin_call_type',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+						{"name" : "业务办理类","value" : "业务办理类"}, 
+						{"name" : "咨询类","value" : "咨询类"}, 
+						{"name" : "查询类","value" : "查询类"},
+						{"name" : "其他类","value" : "其他类"},
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				value : callin_call_type,
+				hidden : false,
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;差错类型',
+				id : 'form_error_type',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+					    {"name":"请选择", "value":""}, {"name":"无差错", "value":"无差错"}, 
+					    {"name":"非严重性差错", "value":"非严重性差错"}, {"name":"严重性差错", "value":"严重性差错"},
+					    {"name":"致命性差错", "value":"致命性差错"} 
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				editable : false,
+				value : bean.error_type,
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;考核类别',
+				id : 'form_callout_check_type',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+						{"name" : "请选择","value" : ""},{"name" : "规范话术","value" : "规范话术"},
+						{"name" : "问候语","value" : "问候语"},{"name" : "普通话","value" : "普通话"},
+						{"name" : "电话礼仪","value" : "电话礼仪"},{"name" : "倾听技巧","value" : "倾听技巧"},
+						{"name" : "语气语速","value" : "语气语速"},{"name" : "服务态度","value" : "服务态度"},
+						{"name" : "表达技巧","value" : "表达技巧"},{"name" : "控制能力","value" : "控制能力"},
+						{"name" : "业务受理","value" : "业务受理"},{"name" : "有效挽留","value" : "有效挽留"},
+						{"name" : "销售意识","value" : "销售意识"},{"name" : "结束语","value" : "结束语"},
+						{"name" : "工作态度","value" : "工作态度"},{"name" : "核实客户","value" : "核实客户"},
+						{"name" : "业务介绍","value" : "业务介绍"},{"name" : "资费介绍","value" : "资费介绍"},
+						{"name" : "再次确认","value" : "再次确认"},{"name" : "诈单","value" : "诈单"},
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				editable : false,
+				hidden : false,
+				value : bean.check_type,
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;考核类别',
+				id : 'form_callin_check_type',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+						{"name" : "请选择","value" : ""},{"name" : "规范话术","value" : "规范话术"},
+						{"name" : "普通话","value" : "普通话"},{"name" : "语气语速","value" : "语气语速"},
+						{"name" : "电话礼仪","value" : "电话礼仪"},{"name" : "等候关怀","value" : "等候关怀"},
+						{"name" : "询问技巧","value" : "询问技巧"},{"name" : "表达技巧","value" : "表达技巧"},
+						{"name" : "倾听技巧","value" : "倾听技巧"},{"name" : '服务态度', "value" : '服务态度'},
+						{"name" : '工作态度', "value" : '工作态度'},{"name" : '业务介绍', "value" : '业务介绍'},
+						{"name" : '业务办理差错', "value" : '业务办理差错'},{"name" : '推诿客户', "value" : '推诿客户'},
+						{"name" : '主动营销', "value" : '主动营销'},{"name" : '引导技巧/有效挽留', "value" : '引导技巧/有效挽留'},
+						{"name" : '普通投诉', "value" : '普通投诉'},{"name" : '升级投诉', "value" : '升级投诉'},
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				editable : false,
+				hidden : false,
+				value : bean.check_type,
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;质检评分',
+				id : 'form_check_result',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+						{"name" : "0","value" : "0"},
+						{"name" : "50","value" : "50"}, 
+						{"name" : "80","value" : "80"},
+						{"name" : "95","value" : "95"},
+						{"name" : "100","value" : "100"},
+						{"name" : "105","value" : "105"}  
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				value : bean.check_result,
+				colspan : 2,
+			}, {
+				xtype : 'textarea',
+				id : 'form_result_describe',
+				fieldLabel : '&nbsp;&nbsp;质检评语',
+				colspan : 2,
+				width : 450,
+				height : 100,
+				value : bean.result_describe,
+			} ],
+			buttons : [{
+				text : '提交',
+				handler : function() {
+					var recording_type = Ext.getCmp("form_recording_type").value;
+					var call_type = Ext.getCmp("form_call_type").getRawValue();
+					var error_type = Ext.getCmp("form_error_type").value;
+					var check_result = Ext.getCmp("form_check_result").getRawValue();
+					check_result = check_result.replace(/(^\s*)|(\s*$)/g, "");//去空格
+					
+					var result_describe = Ext.getCmp("form_result_describe").value;
+					var callin_type = Ext.getCmp("form_callin_check_type").value;
+					var callout_type = Ext.getCmp("form_callout_check_type").value;
+					var callin_call_type = Ext.getCmp("form_callin_call_type").getRawValue();
+					var callout_call_type = Ext.getCmp("form_callout_call_type").getRawValue();
+					
+					var check_type = "";
+					if(recording_type == "呼入") check_type = callin_type;
+					else check_type = callout_type;
+					
+					var call_leaf_type = "";
+					if(callin_call_type != "") call_leaf_type = callin_call_type;
+					else call_leaf_type = callout_call_type;
+					
+					save_recording_check_result(bean,recording_type,call_type,call_leaf_type,
+						error_type,check_type,check_result,result_describe);
+				}
+			}]
+		});
+		
+		//呼入、外呼
+		if(recording_type == "呼入") { 
+			Ext.getCmp("form_callin_check_type").show();
+			Ext.getCmp("form_callout_check_type").hide();
+			
+			Ext.getCmp("form_callin_call_type").show();
+			Ext.getCmp("form_callout_call_type").hide();
+		}else {
+			Ext.getCmp("form_callout_check_type").show();
+			Ext.getCmp("form_callin_check_type").hide();
+			
+			Ext.getCmp("form_callout_call_type").show();
+			Ext.getCmp("form_callin_call_type").hide();
+		}
+		
+		window_modify_recording_check.show();
+	}
+	
+	//保存质检结果
+	function save_recording_check_result(bean,recording_type,call_type,call_leaf_type,
+		error_type,check_type,check_result,result_describe) {
+		
+		Ext.Ajax.request({
+			url : '/ccdms/saveRecordingCheckResult.do',
+			params : {
+				'check_result.id' : bean.id,                          //主键
+				'check_result.recording_type' : recording_type,       //录音类型
+				'check_result.call_type' : call_type,                 //业务范围
+				'check_result.call_leaf_type' : call_leaf_type,       //业务范围
+				'check_result.error_type' : error_type,               //差错类型
+				'check_result.check_type' : check_type,               //考核类别
+				'check_result.check_result' : check_result,           //评分
+				'check_result.result_describe' : result_describe,     //评语
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					recording_check_result_store.reload();
+					window_modify_recording_check.close();
+					Ext.Msg.show({
+						title : '消息',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.INFO
+					});
+				}else {
+					Ext.Msg.show({
+						title : '错误',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.ERROR
+					});
+				}
+			}
+		});
+	}
+	
+	//复检
+	function open_recheck_result_window(bean) {
+		var recording_type;
+		if(bean.called == "07311255993" || bean.called == "12559980") {
+			recording_type = "呼入";
+		}else { 
+			recording_type = "外呼";
+		}
+		//--
+		window_recheck_result = Ext.create('Ext.window.Window', {
+			title : '质检录音',
+			width : 500,
+			height : 450,
+			autoShow : true,
+			modal : true,
+			bodyPadding : 10,
+			buttonAlign : 'center',
+			layout : {
+				type: 'table',
+		        columns: 2,
+			},
+			defaults : {
+				labelWidth : 70,
+			},
+			items : [ {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;工号',
+				readOnly : true,
+				value : bean.agent_id,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;录音时间',
+				readOnly : true,
+				value : bean.recording_time,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;源主叫',
+				readOnly : true,
+				value : bean.origcaller,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;主叫',
+				readOnly : true,
+				value : bean.caller,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;源被叫',
+				readOnly : true,
+				value : bean.origcalled,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;被叫',
+				readOnly : true,
+				value : bean.called,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;录音类型',
+				readOnly : true,
+				value : recording_type,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;业务范围',
+				readOnly : true,
+				value : bean.call_type,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;业务类型',
+				readOnly : true,
+				value : bean.call_leaf_type,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;差错类型',
+				readOnly : true,
+				value : bean.error_type,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;考核类别',
+				readOnly : true,
+				value : bean.check_type,
+			}, {
+				xtype : 'textfield',
+				readOnly : true,
+				fieldLabel : '&nbsp;&nbsp;质检评分',
+				value : bean.check_result,
+				colspan : 2,
+			}, {
+				xtype : 'textarea',
+				fieldLabel : '&nbsp;&nbsp;质检评语',
+				colspan : 2,
+				width : 450,
+				height : 100,
+				readOnly : true,
+				value : bean.result_describe,
+			}, {
+				xtype : 'textarea',
+				id : 'form_recheck_result',
+				fieldLabel : '&nbsp;&nbsp;复检评语',
+				colspan : 2,
+				width : 450,
+				height : 100,
+				value : bean.recheck_result,
+			} ],
+			buttons : [{
+				text : '提交',
+				handler : function() {
+					var recheck_result = Ext.getCmp("form_recheck_result").value;
+					save_recheck_result(bean,recheck_result);
+				}
+			}]
+		}).show();
+	}
+	
+	//保存质检结果
+	function save_recheck_result(bean,recheck_result) {
+		
+		Ext.Ajax.request({
+			url : '/ccdms/execRecheckResult.do',
+			params : {
+				'check_result.id' : bean.id,                     //主键
+				'check_result.recheck_result' : recheck_result,  //复检
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					recording_check_result_store.reload();
+					window_recheck_result.close();
+					Ext.Msg.show({
+						title : '消息',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.INFO
+					});
+				}else {
+					Ext.Msg.show({
+						title : '错误',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.ERROR
+					});
+				}
+			}
+		});
+	}
+	
+	//查看复检
+	function open_recheck_info_window(bean) {
+		//--
+		window_recheck_result = Ext.create('Ext.window.Window', {
+			title : '质检录音',
+			width : 500,
+			autoShow : true,
+			modal : true,
+			bodyPadding : 10,
+			buttonAlign : 'center',
+			layout : {
+				type: 'table',
+			},
+			items : [ {
+				xtype : 'textarea',
+				fieldLabel : '&nbsp;&nbsp;复检评语',
+				width : 450,
+				height : 100,
+				readOnly : true,
+				value : bean.recheck_result,
+			} ],
+		}).show();
+	}
+	
+	//试听
+	function open_audition_record_window(fname) {
+		Ext.Ajax.request({
+			url : '/ccdms/auditionRecordData.do?file_path=' + fname,
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					window_audition_record = Ext.create('Ext.window.Window', {
+						title : '录音播放',
+						autoShow : true,
+						width : 400,
+						height : 150,
+						//modal : true,
+						html : '<embed name="audioplayer" id="audioplayer" src="'+result.out_file_path+'" type="audio/x-wav" hidden="false"  width="400" height="150"  autostart="true" loop="false" /></embed/>',
+					});
+				}
+			}
+		});
+	}
+
+	//下载
+	function action_download_record(fname) {
+		Ext.Ajax.request({
+			url : '/ccdms/downloadRecordData.do?file_path=' + fname,
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					window.location.href = result.out_file_path;
+				}
+			}
+		});
+	}
+</script>
+</head>
+<body>
+</body>
+</html>

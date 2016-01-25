@@ -1,0 +1,573 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript">
+	var window_add_script;
+	var store_grid_script;
+	var store_grid_script_detail;
+	
+	Ext.onReady(function() {
+		//实体对象（数据关联）--------------------------
+		Ext.define('model_store_grid_script', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'script_name',
+				type : 'string',
+			}, {
+				name : 'issue',
+				type : 'int',
+			}, {
+				name : 'create_time',
+				type : 'string',
+			} ]
+		});
+		Ext.define('model_store_grid_script_detail', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'script_id',
+				type : 'int',
+			}, {
+				name : 'content_type',
+				type : 'string',
+			}, {
+				name : 'content_sort',
+				type : 'int',
+			}, {
+				name : 'content_detail',
+				type : 'string',
+			} ]
+		});
+		//数据获取---------------------------------
+		store_grid_script = Ext.create('Ext.data.Store', {
+			pageSize : 20,
+			model : model_store_grid_script,
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/listScript.do',
+				actionMethods: {
+			        read : 'post'
+			    },
+				reader : {
+					type : 'json',
+					root : 'rows',
+					totalProperty : 'total'
+				}
+			}
+		});
+		//数据显示---------------------------------
+		var grid_script = Ext.create('Ext.grid.Panel', {
+			title : '脚本管理',
+			store : store_grid_script,
+			columnLines : true,
+			rowLines : true,
+			loadMask : true,
+			columns : [ {
+				text : 'ID',
+				dataIndex : 'id',
+				width : 40,
+			}, {
+				text : '脚本名称',
+				dataIndex : 'script_name',
+				flex : 1,
+			}, {
+				text : '是否发布',
+				dataIndex : 'issue',
+				width : 200,
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = "";
+					if (record.data["issue"] == 1) {
+						str += "<font style='color:green'>已发布</font>";
+					} else {
+						str += "<font style='color:red'>未发布</font>";
+					}
+					return str;
+				}
+			}, {
+				text : '创建时间',
+				dataIndex : 'create_time',
+				width : 200,
+			}, {
+				text : '操作',
+				width : 200,
+				align : 'right',
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = '';
+					str += '<a href="#" onClick="action_view_script(' + record.data["id"] + ')">预览</a>&nbsp;';
+					if (record.data["issue"] == 1) {
+					} else {
+						str += '<a href="#" onClick=open_window_save_script(' + record.data["id"] + ',"'+ record.data["script_name"] +'")>修改</a>&nbsp;';
+						str += '<a href="#" onClick="open_script_detail_window(' + record.data["id"] + ',\'' + record.data["script_name"] + '\')">内容</a>&nbsp;';
+						str += '<a href="#" onClick="action_delete_script(' + record.data["id"] + ',\'' + record.data["script_name"] + '\')">删除</a>&nbsp;';
+						str += '<a href="#" onClick="action_release_script(1,' + record.data["id"] + ',\'' + record.data["script_name"] + '\')">发布</a>&nbsp;';
+					}
+					return str;
+				}
+			} ],
+			bbar : Ext.create('Ext.toolbar.Paging', {
+				store : store_grid_script,
+				displayInfo : true,
+			}),
+			tools : [ {
+				type : 'plus',
+				tooltip : '添加脚本',
+				handler : function() {
+					open_window_save_script();
+				},
+			}, {
+				type : 'search',
+				tooltip : '查询脚本',
+				handler : function() {
+					window_search();
+				},
+			} ],
+		});
+		//入口---------------------------------
+		var viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_script ],
+		});
+	});
+	
+	//
+	function open_window_save_script(id,script_name) {
+		var param = "";
+		if(id != null && id != "null") {
+			param = "?script.id="+id;
+			Ext.Ajax.request({
+				url : '/ccdms/getEditScriptOptions.do'+param,
+				success : function(resp, ops) {
+					var result = Ext.JSON.decode(resp.responseText);
+					if (result.resp == 'success') {
+						var list_result = result.describe;
+						Ext.getCmp('input_list_result').setValue(list_result);
+					}
+				}
+			});
+		}
+		
+		window_add_script = Ext.create('Ext.window.Window', {
+			title : '添加脚本',
+			width : 400,
+			modal : true,
+			layout : 'form',
+			resizable : false,
+			bodyPadding : 10,
+			buttonAlign : 'center',
+			items : [ {
+				xtype : 'textfield',
+				id : 'input_script_name',
+				fieldLabel : '脚本名称',
+				value : script_name,
+			}, {
+				fieldLabel : '脚本结果',
+				xtype : 'textarea',
+				id : 'input_list_result',
+				emptyText : '选项之间用 || 隔开，例：回访成功||回访失败',
+			} ],
+			buttons : [ {
+				text : '提交',
+				handler : function() {
+					Ext.Ajax.request({
+						url : '/ccdms/addScript.do'+param,
+						params : {
+							'script.script_name' : Ext.getCmp('input_script_name').getValue(),
+							'list_result' : Ext.getCmp('input_list_result').getValue(),
+						},
+						success : function(resp, ops) {
+							var result = Ext.JSON.decode(resp.responseText);
+							if (result.resp == 'success') {
+								window_add_script.close();
+								store_grid_script.load();
+							} else {
+								alert(result.describe);
+							}
+						}
+					});
+				}
+			} ]
+		}).show();
+	}
+	
+	//删除
+	function action_delete_script(id, script_name) {
+		if(!confirm("是否确定删除：["+ script_name +"]")) {
+			return;
+		}
+		
+		Ext.Ajax.request({
+			url : '/ccdms/delScript.do',
+			params : {
+				'script.id' : id,
+			},
+			success : function(resp, ops) {
+				var result = Ext.JSON.decode(resp.responseText);
+				if (result.resp == 'success') {
+					store_grid_script.load();
+				} else {
+					alert(result.describe);
+				}
+			}
+		});
+	}
+	
+	//发布
+	function action_release_script(value, id, script_name) {
+		if(!confirm("是否确定发布：["+ script_name +"]")) {
+			return;
+		}
+		
+		Ext.Ajax.request({
+			url : '/ccdms/execScript.do',
+			params : {
+				'script.id' : id,
+				'script.issue' : value,
+			},
+			success : function(resp, ops) {
+				var result = Ext.JSON.decode(resp.responseText);
+				if (result.resp == 'success') {
+					store_grid_script.load();
+				} else {
+					alert(result.describe);
+				}
+			}
+		});
+	}
+	
+	//内容
+	function open_script_detail_window(id, script_name) {
+		store_grid_script_detail = Ext.create('Ext.data.Store', {
+			model : model_store_grid_script_detail,
+			autoLoad : false,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/infoScriptDetail.do?script_detail.script_id='+id,
+				reader : {
+					type : 'json',
+					root : 'list',
+				}
+			}
+		});
+		//---------------------------------------
+		var edit_window_param = new Object({
+			title : script_name,
+			width : 800,
+			height : 500,
+			modal : true,
+			layout : 'fit',
+			tools : [ {
+				type : 'plus',
+				handler : function() {
+					open_window_add_script(id);
+				}
+			}],
+			items : {
+				xtype : 'grid',
+				border : false,
+				columns : [ {
+					text : 'ID',
+					dataIndex : 'id',
+					width : 60
+				}, {
+					text : '类别',
+					dataIndex : 'content_type',
+					width : 80
+				}, {
+					text : '序列',
+					dataIndex : 'content_sort',
+					width : 80
+				}, {
+					text : '详情',
+					flex : 1,
+					dataIndex : 'content_detail'
+				}, {
+					text : '操作',
+					align : 'right',
+					width : 80,
+					renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+						var id=record.data["id"]; 
+						var script_id=record.data["script_id"];
+						var content_type=record.data["content_type"]; 
+						var content_sort=record.data["content_sort"];
+						//var content_detail=record.data["content_detail"];
+						//content_detail = content_detail.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+						//content_detail = content_detail.replace(/\n/g,"&lt;br&gt;");
+						
+						var str = '';
+						str += '<a href="#" onClick="action_delete_script_content_detail(' + record.data["id"] + ')">删除</a>&nbsp;';
+						//str += '<a href="#" onClick=open_window_modify_script('+id+','+script_id+',"'+content_type+'",'+content_sort+',"'+content_detail+'")>修改</a>';
+						str += '<a href="#" onClick=open_window_modify_script('+id+','+script_id+',"'+content_type+'",'+content_sort+')>修改</a>';
+						return str;
+					}
+				} ],
+				store : store_grid_script_detail,
+			}
+		});
+		
+		//---
+		window_list_script_detail = Ext.create('Ext.window.Window', edit_window_param).show();
+		store_grid_script_detail.load();
+	}
+	
+	//查询脚本
+	function window_search() {
+		var window_search = Ext.create('Ext.window.Window', {
+			width : 300,
+			height : 160,
+			modal : true,
+			layout : 'form',
+			bodyPadding : 10,
+			items : [ {
+				xtype : 'textfield',
+				fieldLabel : '标题',
+				id : 'search_script_name'
+			}, {
+				xtype : 'datefield',
+				fieldLabel : '开始日期',
+				format : 'Y-m-d',
+				id : 'search_start_time'
+			}, {
+				xtype : 'datefield',
+				fieldLabel : '结束日期',
+				format : 'Y-m-d',
+				id : 'search_end_time'
+			} ],
+			buttonAlign : 'center',
+			buttons : [ {
+				text : '查询',
+				handler : function() {
+					var search_script_name = Ext.getCmp('search_script_name').getValue();
+					var search_start_time = Ext.getCmp('search_start_time').getRawValue();
+					var search_end_time = Ext.getCmp('search_end_time').getRawValue();
+					
+					store_grid_script.on('beforeload', function(store) {
+						Ext.apply(store.proxy.extraParams, {
+							'search_script_name' : search_script_name,
+							'search_start_time' : search_start_time,
+							'search_end_time' : search_end_time,
+						});
+					});
+					store_grid_script.loadPage(1);
+					window_search.close();
+				}
+			} ]
+		}).show();
+	}
+	
+	//删除
+	function action_delete_script_content_detail(id) {
+		if(!confirm("是否确定删除")) {
+			return;
+		}
+		
+		Ext.Ajax.request({
+			url : '/ccdms/delScriptDetail.do',
+			params : {
+				'script_detail.id' : id,
+			},
+			success : function(resp, opts) {
+				var result = Ext.JSON.decode(resp.responseText);
+				if (result.resp == 'success') {
+					store_grid_script_detail.load();
+				} else {
+					alert(result.describe);
+				}
+			}
+		});
+	}
+	
+	//浏览
+	function action_view_script(id) {
+		Ext.Ajax.request({
+			url : '/ccdms/showScriptDetailInfo.do',
+			params : {
+				'script_detail.script_id' : id,
+			},
+			success : function(resp, ops) {
+				var result = Ext.JSON.decode(resp.responseText);
+				if (result.resp == 'success') {
+					var window_view_script = Ext.create('Ext.window.Window', {
+						title : result.script_name,
+						width : 700,
+						height : 450,
+						autoScroll : true,
+						modal : true,
+						html : result.html,
+						resizable : false,
+						bodyPadding : 10,
+					}).show();
+				} else {
+					alert(result.describe);
+				}
+			},
+		});
+	}
+	
+	//新增脚本详细内容
+	function open_window_add_script(script_id) {
+		window_add_script_detail = Ext.create('Ext.window.Window', {
+			title : '编辑脚本内容',
+			width : 800,
+			height : 500,
+			modal : true,
+			layout : 'form',
+			bodyPadding : 10,
+			buttonAlign : 'center',
+			items : [ {
+				xtype : 'textfield',
+				fieldLabel : '内容组合顺序',
+				id : 'input_script_detail_sort',
+			}, {
+				xtype : 'combo',
+				id : 'input_script_detail_type',
+				fieldLabel : '内容的类别',
+				editable : false,
+				displayField : 'name',
+				valueField : 'abbr',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'abbr', 'name' ],
+					data : [ {
+						"abbr" : "describe",
+						"name" : "陈述"
+					}, {
+						"abbr" : "radio",
+						"name" : "单选"
+					}, {
+						"abbr" : "checkbox",
+						"name" : "多选"
+					}, {
+						"abbr" : "question",
+						"name" : "简答"
+					} ]
+				}),
+			}, {
+				xtype : 'textareafield',
+				grow : true,
+				id : 'input_script_detail_content',
+				fieldLabel : '内容详情:',
+				anchor : '100%',
+				height : 300,
+				emptyText : '注意事项:\r\n1.如果类型为陈述，直接在此输入陈述内容即可。\r\n2.如果类型为单选或者多选。问题和选项用\"//\"分割，选项间用\"||\"分割。',
+			} ],
+			buttons : [ {
+				text : '保存',
+				handler : function() {
+					ajax_add_script_detail(null,script_id);
+				}
+			} ]
+		}).show();
+	}
+	
+	//修改脚本详细内容
+	function open_window_modify_script(detail_id,script_id,content_type,content_sort) {
+		var content_detail = "";//内容
+		Ext.Ajax.request({
+			url : '/ccdms/infoScriptRadioDetail.do',
+			params : {
+				'script_detail.id' : detail_id,
+			},
+			success : function(resp, opts) {
+				var result = Ext.JSON.decode(resp.responseText);
+				if (result.resp == 'success') {
+					content_detail = result.script_detail_bean.content_detail;
+					
+					window_add_script_detail = Ext.create('Ext.window.Window', {
+						title : '编辑脚本内容',
+						width : 800,
+						height : 500,
+						modal : true,
+						layout : 'form',
+						bodyPadding : 10,
+						buttonAlign : 'center',
+						items : [ {
+							xtype : 'textfield',
+							fieldLabel : '内容组合顺序',
+							id : 'input_script_detail_sort',
+							value : content_sort,
+						}, {
+							xtype : 'combo',
+							id : 'input_script_detail_type',
+							fieldLabel : '内容的类别',
+							editable : false,
+							displayField : 'name',
+							valueField : 'abbr',
+							store : Ext.create('Ext.data.Store', {
+								fields : [ 'abbr', 'name' ],
+								data : [ {
+									"abbr" : "describe",
+									"name" : "陈述"
+								}, {
+									"abbr" : "radio",
+									"name" : "单选"
+								}, {
+									"abbr" : "checkbox",
+									"name" : "多选"
+								}, {
+									"abbr" : "question",
+									"name" : "简答"
+								} ]
+							}),
+							value : content_type,
+						}, {
+							xtype : 'textareafield',
+							grow : true,
+							id : 'input_script_detail_content',
+							fieldLabel : '内容详情:',
+							anchor : '100%',
+							height : 300,
+							value : content_detail,
+							emptyText : '注意事项:\r\n1.如果类型为陈述，直接在此输入陈述内容即可。\r\n2.如果类型为单选或者多选。问题和选项用\"//\"分割，选项间用\"||\"分割。',
+						} ],
+						buttons : [ {
+							text : '保存',
+							handler : function() {
+								ajax_add_script_detail(detail_id,script_id);
+							}
+						} ]
+					}).show();
+				}
+			}
+		});
+	}
+	
+	//保存脚本
+	function ajax_add_script_detail(detail_id,script_id) {
+		var param = "";
+		if(detail_id != null && detail_id != "null") {
+			param = "?script_detail.id="+detail_id;
+		}
+		
+		Ext.Ajax.request({
+			url : '/ccdms/addScriptDetail.do'+param,
+			params : {
+				'script_detail.script_id' : script_id,
+				'script_detail.content_type' : Ext.getCmp('input_script_detail_type').getValue(),
+				'script_detail.content_sort' : Ext.getCmp('input_script_detail_sort').getValue(),
+				'script_detail.content_detail' : Ext.getCmp('input_script_detail_content').getValue()
+			},
+			success : function(resp, opts) {
+				var result = Ext.JSON.decode(resp.responseText);
+				if (result.resp == 'success') {
+					window_add_script_detail.close();
+					store_grid_script_detail.load();
+				} else {
+					alert(result.describe);
+				}
+			}
+		});
+	}
+</script>
+</head>
+<body>
+</body>
+</html>

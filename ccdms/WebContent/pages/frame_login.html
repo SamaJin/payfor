@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>系统登录</title>
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all-neptune.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/ccdms/js/timeout.js"></script>
+
+<script type="text/javascript">
+	var window_login;
+	//IE窗口变化，登录window永远居中显示
+	Ext.EventManager.onWindowResize(function() {
+		if (window_login) {
+			window_login.center();
+		}
+	});
+	//----
+	Ext.onReady(function() {
+		window_login = Ext.create('Ext.window.Window', {
+			title : '用户登录窗口',
+			autoShow : true,
+			closable : false,
+			width : 300,
+			layout : 'form',
+			bodyPadding : 15,
+			plain : true,
+			resizable : false,
+			buttonAlign : 'center',
+			items : [ {
+				xtype : 'textfield',
+				id : 'input_user_name',
+				fieldLabel : '用户',
+				labelWidth : 50,
+				labelAlign : 'left',
+			}, {
+				xtype : 'textfield',
+				id : 'input_user_password',
+				fieldLabel : '密码',
+				inputType : 'password',
+				labelWidth : 50,
+				labelAlign : 'left',
+			} ],
+			buttons : [ {
+				text : '登录',
+				handler : function() {
+					Ext.Ajax.request({
+						url : '/ccdms/systemLogin.do',
+						params : {
+							admin_user_name : Ext.getCmp("input_user_name").getValue(),
+							admin_user_password : Ext.getCmp("input_user_password").getValue(),
+						},
+						success : function(response) {
+							var result = Ext.decode(response.responseText);
+							if (result.return_status == 'success') {
+								window.location.href = '/ccdms/initSystemIndex.do';
+							} else {
+								alert(result.return_describe);
+							}
+						}
+					});
+				}
+			}, {
+				text : '重置',
+				handler : function() {
+
+				}
+			} ],
+		})
+	});
+</script>
+</head>
+<body>
+</body>
+</html>

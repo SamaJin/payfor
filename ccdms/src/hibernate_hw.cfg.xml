@@ -1,0 +1,26 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+	"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+	<session-factory>
+		<!-- Platforms -->
+		<property name="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</property>
+		<property name="hibernate.connection.driver_class">oracle.jdbc.driver.OracleDriver</property>
+		<property name="hibernate.connection.url">jdbc:oracle:thin:@172.1.1.41:1521:orcl</property>
+		<property name="hibernate.connection.username">zx_hpcall</property>
+		<property name="hibernate.connection.password">0731call</property>
+		<!-- C3P0 Connection Pool -->
+		<property name="hibernate.connection.provider_class">org.hibernate.c3p0.internal.C3P0ConnectionProvider</property>
+		<property name="hibernate.c3p0.min_size">1</property>
+		<property name="hibernate.c3p0.max_size">15</property>
+		<property name="hibernate.c3p0.max_statements">50</property>
+		<property name="hibernate.c3p0.timeout">300</property>
+		<property name="hibernate.c3p0.validate">true</property>
+		<property name="hibernate.c3p0.idle_test_period">3000</property>
+		<property name="hibernate.c3p0.testConnectionOnCheckout">true</property>
+		<!-- Miscellaneous Settings -->
+		<property name="hibernate.show_sql">false</property>
+		<property name="hibernate.hbm2ddl.auto">update</property>
+	</session-factory>
+</hibernate-configuration>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_script" extends="interceptors" namespace="/">
+		<default-interceptor-ref name="stack_check_user"></default-interceptor-ref>
+		<action name="initScriptList" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="init_script_list">
+			<result>/pages/eaphelp/manage_script_list.html</result>
+		</action>
+		
+		<action name="addScript" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="add_script">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="listScript" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="list_script">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="allScript" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="all_script">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="delScript" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="del_script">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="execScript" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="exec_script">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="infoScriptDetail" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="info_script_detail">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="addScriptDetail" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="add_script_detail">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="delScriptDetail" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="del_script_detail">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="showScriptDetailInfo" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="show_script_detail_info">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="showScriptDataInfo" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="show_script_data_info">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="getEditScriptOptions" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="get_edit_script_options">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="infoScriptRadioDetail" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="info_script_radio_detail">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+	</package>
+</struts>

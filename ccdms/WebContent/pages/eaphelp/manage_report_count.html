@@ -1,0 +1,398 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript">
+	var store_report_name_data;
+	var store_report_column_data;
+	var store_script_options_data;
+	var store_grid_record;
+	
+	//初始化
+	Ext.onReady(function() {
+		Ext.define('model_report_name', {
+			extend : 'Ext.data.Model',
+			fields : [{
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'script_id',
+				type : 'int',
+			}, {
+				name : 'script_name',
+				type : 'string',
+			}],
+		});
+		store_report_name_data = Ext.create('Ext.data.Store', {
+			pageSize : 10,
+			model : model_report_name,
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/listReportName.do',
+				reader : {
+					type : 'json',
+					root : 'rows',
+					totalProperty : 'total'
+				}
+			}
+		});
+		//------------------------------------------
+		Ext.define('model_count_column', {
+			extend : 'Ext.data.Model',
+			fields : [{
+				name : 'count_id',
+				type : 'int',
+			}, {
+				name : 'callout_time',
+				type : 'string',
+			}, {
+				name : 'agent_id',
+				type : 'string',
+			}, {
+				name : 'script_id',
+				type : 'string',
+			}, {
+				name : 'callNum',
+				type : 'string',
+			}, {
+				name : 'openNum',
+				type : 'string',
+			}, {
+				name : 'opens',
+				type : 'string',
+			}, {
+				name : 'username',
+				type : 'string',
+			}, {
+				name : 'teamname',
+				type : 'string',
+			}],
+		});
+		store_report_column_data = Ext.create('Ext.data.Store', {
+			pageSize : 20,
+			model : model_count_column,
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/countReportData.do',
+				actionMethods: {
+			        read : 'post'
+			    },
+				reader : {
+					type : 'json',
+					root : 'rows',
+					totalProperty : 'total'
+				}
+			}
+		});
+		//------------------
+		Ext.define('model_record', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'agent_code',
+				type : 'string'
+			}, {
+				name : 'caller_number',
+				type : 'string'
+			}, {
+				name : 'file_name',
+				type : 'string'
+			}, {
+				name : 'start_time',
+				type : 'string'
+			}, {
+				name : 'end_time',
+				type : 'string'
+			} ]
+		});
+		store_grid_record = Ext.create('Ext.data.Store', {
+			model : 'model_record',
+			autoLoad : false,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/listRecordData.do',
+				reader : {
+					type : 'json',
+					root : 'rows',
+					totalProperty : 'total'
+				},
+			}
+		});
+		//---------------------------------------
+		var toolbar_search = Ext.create('Ext.toolbar.Toolbar',{
+			items:[
+			    '脚本名称:', {
+			    	xtype : 'combo',
+			    	id : 'input_script',
+			    	displayField : 'script_name',
+					valueField : 'id',
+					queryMode: 'local',
+					store : store_report_name_data,
+			    }, '工号:', {
+			    	xtype : 'field',
+			    	id : 'input_agent_id',
+			    	width : 60,
+			    }, '号码:', {
+			    	xtype : 'field',
+			    	id : 'input_callout_phone',
+			    	width : 110,
+			    }, '姓名:', {
+			    	xtype : 'field',
+			    	id : 'input_username',
+			    	width : 110,
+			    }, '团队:', {
+			    	xtype : 'field',
+			    	id : 'input_teamname',
+			    	width : 110,
+			    },'日期:', {
+			    	xtype : 'datefield',
+			    	id: 'input_start_date',
+			    	format : 'Y-m-d',
+			    	flex : 1,
+			    }, '至', {
+			    	xtype : 'datefield',
+			    	id: 'input_end_date',
+			    	format : 'Y-m-d',
+			    	flex : 1,
+			    }, {
+			    	text:'保存查询结果',
+			    	handler:function(){
+						saveResult();
+					}
+			    },{
+			    	text:'显示查询结果',
+			    	handler:function(){
+						search();
+					}
+			    }, {
+			    	text:'导出EXCEL',
+			    	handler:function(){
+			    		var script_id = Ext.getCmp('input_script').getValue();
+						var agent_id = Ext.getCmp('input_agent_id').getValue();
+						var start_date = Ext.getCmp('input_start_date').getValue();
+						var end_date = Ext.getCmp('input_end_date').getValue();
+						var username = Ext.getCmp('input_username').getValue();
+						start_date = Ext.util.Format.date(start_date, 'Y-m-d');
+						end_date = Ext.util.Format.date(end_date, 'Y-m-d');
+						var teamname = Ext.getCmp('input_teamname').getValue();
+						
+						var param = "?script_id="+script_id;
+						param += "&agent_id="+agent_id;
+						param += "&start_date="+start_date;
+						param += "&end_date="+end_date;
+						param += "&username="+encodeURI(encodeURI(username));
+						param += "&teamname="+encodeURI(encodeURI(teamname));
+						
+						if(script_id != null && script_id != "") {
+							window.location.href = "/ccdms/downloadCountExcel.do"+param;
+						}
+					}
+			    }
+			],
+		});
+		//------------------------------------------
+		var grid_report = Ext.create('Ext.grid.Panel', {
+			tbar : toolbar_search,
+			stripeRows : true,
+			store : store_report_column_data,
+			columnLines : true,
+			loadMask : true,
+		    columns : [, {
+		    	text : '时间',
+		    	dataIndex : 'callout_time',
+		    	width : 180,
+		    }, {
+		    	text : '工号',
+		    	dataIndex : 'agent_id',
+		    	width : 150,
+		    }, {
+		    	text : '外呼量',
+		    	dataIndex : 'callNum',
+		    	width : 150,
+		    }, {
+		    	text : '开通量',
+		    	dataIndex : 'openNum',
+		    	flex : 1,
+		    }, {
+		    	text : '开通率',
+		    	dataIndex : 'opens',
+		    	flex : 1,
+		    }, {
+		    	text : '姓名',
+		    	dataIndex : 'username',
+		    	flex : 1,
+		    }, {
+		    	text : '团队',
+		    	dataIndex : 'teamname',
+		    	flex : 1,
+		    }, {
+		    	text : '操作',
+		    	align : 'right',
+		    	width : 150,
+		    	renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = '';
+					str += '<a href="#" onClick=window_show_recording_list("'+ record.data["agent_id"] +'","'+ record.data["callout_phone"] +'")>录音</a>';
+					return str;
+				}
+		    }],
+		    bbar : Ext.create('Ext.toolbar.Paging', {
+				store : store_report_column_data,
+				displayInfo : true,
+			}),
+		});
+		//------------------------------------------
+		var viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_report ],
+			renderTo : Ext.getBody(),
+		});
+	});
+	
+	//查询
+	function search(){
+		var script_id = Ext.getCmp('input_script').getValue();
+		var agent_id = Ext.getCmp('input_agent_id').getValue();
+		var start_date = Ext.getCmp('input_start_date').getValue();
+		var end_date = Ext.getCmp('input_end_date').getValue();
+		var username = Ext.getCmp('input_username').getValue();
+		start_date = Ext.util.Format.date(start_date, 'Y-m-d');
+		end_date = Ext.util.Format.date(end_date, 'Y-m-d');
+		var teamname = Ext.getCmp('input_teamname').getValue();
+		
+		store_report_column_data.proxy.extraParams = {
+			"script_id"     : script_id,
+			"agent_id"      : agent_id,
+			"start_date"    : start_date,
+			"end_date"      : end_date,
+			"username" 		: username,
+			'teamname'      : teamname,
+		};
+		store_report_column_data.reload();
+	}
+	
+	function saveResult() {
+		var script_id = Ext.getCmp('input_script').getValue();
+		var agent_id = Ext.getCmp('input_agent_id').getValue();
+		var start_date = Ext.getCmp('input_start_date').getValue();
+		var end_date = Ext.getCmp('input_end_date').getValue();
+		var username = Ext.getCmp('input_username').getValue();
+		start_date = Ext.util.Format.date(start_date, 'Y-m-d');
+		end_date = Ext.util.Format.date(end_date, 'Y-m-d');
+		var teamname = Ext.getCmp('input_teamname').getValue();
+		Ext.Ajax.request({
+			url : '/ccdms/saveCountDate.do',
+			params : {
+				script_id     : script_id,
+				agent_id      : agent_id,
+				start_date    : start_date,
+				end_date      : end_date,
+				username      : username,
+				teamname      : teamname,
+			},
+			success : function(response) {
+				var result = Ext.decode(response.responseText);
+				if (result.return_status == 'success') {
+					alert('查询数据成功,请点击显示查询数据查看!');
+				} else {
+					alert('数据查询错误!');
+				}
+			}
+		});
+	}
+	
+	
+	//录音列表
+	function window_show_recording_list(agent_id,user_mobile) {
+		store_grid_record.on('beforeload', function() {
+			Ext.apply(store_grid_record.proxy.extraParams, {
+				'agent_code' : agent_id,
+				'caller_number' : user_mobile,
+			});
+		});
+		store_grid_record.load();
+		
+		var window_recording_list = Ext.create('Ext.window.Window', {
+			title : "录音列表",
+			width : 600,
+			height : 400,
+			modal : true,
+			layout : 'fit',
+			items : [{
+				xtype : 'grid',
+				store : store_grid_record,
+				columnLines : true,
+				loadMask : true,
+				columns : [{
+					text : '工号',
+					dataIndex : 'agent_code',
+				}, {
+					text : '用户号码',
+					dataIndex : 'caller_number',
+					flex : 1,
+				}, {
+					text : '开始时间',
+					dataIndex : 'start_time',
+					flex : 1,
+				}, {
+					text : '结束时间',
+					dataIndex : 'end_time',
+					flex : 1,
+				}, {
+					text : '操作',
+					align : 'right',
+					flex : 1,
+					renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+						var str = "";
+						str += '<a href="#" onClick="open_audition_record_window(\'' + record.data["file_name"] + '\')">试听</a>&nbsp;&nbsp;';
+						str += '<a href="#" onClick="action_download_record(\'' + record.data["file_name"] + '\')">下载</a>&nbsp;&nbsp;';
+						return str;
+					}
+				} ],
+			}],
+			bbar : Ext.create('Ext.toolbar.Paging', {
+				store : store_grid_record,
+				displayInfo : true,
+			}),
+		}).show();
+	}
+	
+	//--
+	function open_audition_record_window(fname) {
+		Ext.Ajax.request({
+			url : '/ccdms/auditionRecordData.do?file_path=' + fname,
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					window_audition_record = Ext.create('Ext.window.Window', {
+						title : '录音播放',
+						autoShow : true,
+						width : 400,
+						height : 150,
+						//modal : true,
+						html : '<embed name="audioplayer" id="audioplayer" src="'+result.out_file_path+'" type="audio/x-wav" hidden="false"  width="400" height="150"  autostart="true" loop="false" /></embed/>',
+					});
+				}
+			}
+		});
+	}
+	//--
+	function action_download_record(fname) {
+		Ext.Ajax.request({
+			url : '/ccdms/downloadRecordData.do?file_path=' + fname,
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					window.location.href = result.out_file_path;
+				}
+			}
+		});
+	}
+</script>
+</head>
+<body>
+</body>
+</html>

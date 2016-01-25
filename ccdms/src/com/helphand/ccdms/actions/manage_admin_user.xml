@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_admin_user" extends="interceptors" namespace="/">
+		<default-interceptor-ref name="stack_check_user"></default-interceptor-ref>
+		<action name="initListAdminUser" class="com.helphand.ccdms.actions.manage_admin_user" method="init_list_admin_user">
+			<result>/pages/manage_admin_user.html</result>
+		</action>
+		<action name="listAdminUser" class="com.helphand.ccdms.actions.manage_admin_user" method="list_admin_user">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="addAdminUser" class="com.helphand.ccdms.actions.manage_admin_user" method="add_admin_user">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="deleteAdminUser" class="com.helphand.ccdms.actions.manage_admin_user" method="delete_admin_user">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="initModifyAdminUser" class="com.helphand.ccdms.actions.manage_admin_user" method="init_modify_admin_user">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="modifyAdminUser" class="com.helphand.ccdms.actions.manage_admin_user" method="modify_admin_user">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="addAdminUserAuthority" class="com.helphand.ccdms.actions.manage_admin_user" method="add_admin_user_authority">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="delAdminUserAuthority" class="com.helphand.ccdms.actions.manage_admin_user" method="del_admin_user_authority">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="allModuleGroupName" class="com.helphand.ccdms.actions.manage_admin_user" method="all_module_group_name">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="initModifyAdminUserPassword" class="com.helphand.ccdms.actions.manage_admin_user" method="init_modify_admin_user_password">
+			<result>/pages/manage_admin_user_password.html</result>
+		</action>
+		<action name="modifyAdminUserPassword" class="com.helphand.ccdms.actions.manage_admin_user" method="modify_admin_user_password">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+	</package>
+</struts>

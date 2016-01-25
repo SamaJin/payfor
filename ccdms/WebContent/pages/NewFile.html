@@ -1,0 +1,458 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>编辑资源</title>
+<link href="resources/css/Public.css" rel="stylesheet" type="text/css">
+<link href="resources/css/edit.css" rel="stylesheet" type="text/css">
+<link href="resources/js/easyui/themes/default/easyui.css"
+	rel="stylesheet" type="text/css">
+<link href="resources/js/easyui/themes/icon.css" rel="stylesheet"
+	type="text/css">
+<script src="resources/js/easyui/jquery-1.8.0.min.js"
+	language="javascript"></script>
+<link
+	href="http://www.seekhi.com/resources/js/artDialog4.1.7/skins/blue.css?4.1.7"
+	rel="stylesheet">
+<script src="resources/js/artDialog4.1.7/artDialog.js?skin=blue"
+	language="javascript"></script>
+<script src="resources/js/jquery.form.js" language="javascript"></script>
+<script src="resources/js/easyui/jquery.easyui.min.js"
+	language="javascript"></script>
+<script charset="utf-8" src="ueditor/kindeditor.js"></script>
+<script charset="utf-8" src="ueditor/lang/zh_CN.js"></script>
+<script charset="utf-8" src="ueditor/plugins/code/prettify.js"></script>
+<script type="text/javascript">
+	
+</script>
+<link rel="stylesheet"
+	href="http://www.seekhi.com/ueditor/themes/default/default.css">
+</head>
+
+<body class="body2nd">
+	<div class="" style="display: none; position: absolute;">
+		<div class="aui_outer">
+			<table class="aui_border">
+				<tbody>
+					<tr>
+						<td class="aui_nw"></td>
+						<td class="aui_n"></td>
+						<td class="aui_ne"></td>
+					</tr>
+					<tr>
+						<td class="aui_w"></td>
+						<td class="aui_c"><div class="aui_inner">
+								<table class="aui_dialog">
+									<tbody>
+										<tr>
+											<td colspan="2" class="aui_header"><div
+													class="aui_titleBar">
+													<div style="cursor: move; display: block;"
+														class="aui_title"></div>
+													<a style="display: block;" class="aui_close"
+														href="javascript:/*artDialog*/;">×</a>
+												</div></td>
+										</tr>
+										<tr>
+											<td style="display: none;" class="aui_icon"><div
+													style="background: transparent none repeat scroll 0% 0%;"
+													class="aui_iconBg"></div></td>
+											<td style="width: auto; height: auto;" class="aui_main"><div
+													style="padding: 20px 25px;" class="aui_content"></div></td>
+										</tr>
+										<tr>
+											<td colspan="2" class="aui_footer"><div
+													style="display: none;" class="aui_buttons"></div></td>
+										</tr>
+									</tbody>
+								</table>
+							</div></td>
+						<td class="aui_e"></td>
+					</tr>
+					<tr>
+						<td class="aui_sw"></td>
+						<td class="aui_s"></td>
+						<td style="cursor: se-resize;" class="aui_se"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+
+	<!--发送预览弹出-->
+	<div id="light" class="edit_fs" style="display: none;">
+		<h2>
+			<em class="bt_bg">发送</em> <a href="javascript:void(0)"
+				onclick="document.getElementById('light').style.display='none';document.getElementById('fade2').style.display='none'"><img
+				src="resources/images/tc_3.gif" style="float: right;"></a>
+		</h2>
+		<div class="mb_yulan">
+			<div class="mb_txt">
+				<span id="yulantxt"></span>
+			</div>
+			<form action="" id="resourceFrom1">
+				<ul class="mb_phone">
+					<li><span>选择发送方式</span> <em><input name="channle"
+							value="sms" onclick="showContent('sms')" type="radio"></em><em>短信</em>
+						<em><input name="channle" value="mms"
+							onclick="showContent('mms')" type="radio"></em><em>彩信</em> <em><input
+							name="channle" value="wap" onclick="showContent('wap')"
+							type="radio"></em><em>Wap Push</em></li>
+					<li><span>接收人</span> <input name="message" id="message"
+						type="hidden"> <i><textarea name="phone" cols=""
+								rows="" id="mobile" readonly="readonly"></textarea></i></li>
+					<li><a href="javascript:showPhoneBook();"><img
+							src="resources/images/dr_1.jpg" class="mg_1"></a><a
+						href="javascript:showUploadFile();"><img
+							src="resources/images/dr_2.jpg"></a></li>
+					<li class="edit_eng"><a href="javascript:void(0);"
+						onclick="document.getElementById('light').style.display='none';document.getElementById('fade2').style.display='none'"
+						class="mg_2">编辑</a><a href="javascript:send();">发送</a></li>
+				</ul>
+			</form>
+			<div class="clear"></div>
+		</div>
+	</div>
+	<!--发送保存弹出-->
+	<div id="light2" class="edit_fs2" style="display: none;">
+		<h2>
+			<em class="bt_bg">保存</em> <a href="javascript:void(0)"
+				onclick="document.getElementById('light2').style.display='none';document.getElementById('fade2').style.display='none'"><img
+				src="resources/images/tc_3.gif" style="float: right;"></a>
+		</h2>
+		<div class="mb_yulan">
+			<div class="mb_txt">
+				<span id="yulantxt1"></span>
+			</div>
+			<div class="bc">
+				<a href="javascript:subFrom('apk');"><img
+					src="resources/images/fwq.jpg"></a>
+			</div>
+			<div class="clear"></div>
+		</div>
+	</div>
+	<div id="fade2" class="black_overlay"></div>
+
+	<div class="dq">
+		<p>您的当前位置：内容管理 &gt; 文章编辑 &gt; 录入文章</p>
+	</div>
+
+	<div id="edit">
+		<div class="left_list_A" id="maindiv">
+			<h3>
+				<span><a href="javascript:history.back();"><img
+						src="resources/images/left.jpg"></a><a
+					href="javascript:history.forward();"><img
+						src="resources/images/right.jpg"></a></span><span><input
+					id="url" value="输入查找网址" style="color: rgb(153, 153, 153);"
+					onfocus="if(value=='输入查找网址') {value='';}this.style.color='#000';"
+					onblur="if (value=='') {value='输入查找网址';this.style.color='#999';}"
+					class="input_a prompt_index_step9" type="text"></span><span><input
+					name="" value="搜索" onclick="changUrl('pageFrame');" class="input_b"
+					type="button"></span><em class="prompt_index_step10"><a
+					href="javascript:addPage();"><img src="resources/images/gh.jpg"></a></em>
+			</h3>
+			<div class="txt_list">
+				<iframe id="pageFrame" src="http://www.baidu.com" frameborder="0"
+					height="100%" width="100%"></iframe>
+			</div>
+			<!-- 第二个浏览器 -->
+			<h3 id="mainhead" style="display: none;">
+				<span><a href="javascript:history.back();"><img
+						src="resources/images/left.jpg"></a><a
+					href="javascript:history.forward();"><img
+						src="resources/images/right.jpg"></a></span><span><input
+					id="url1" value="输入查找网址" style="color: rgb(153, 153, 153);"
+					onfocus="if(value=='输入查找网址') {value='';}this.style.color='#000';"
+					onblur="if (value=='') {value='输入查找网址';this.style.color='#999';}"
+					class="input_a" type="text"></span><span><input name=""
+					value="搜索" onclick="changUrl('pageFrame1');" class="input_b"
+					type="button"></span><em><a href="javascript:hidePage();"><img
+						src="resources/images/gh.jpg"></a></em>
+			</h3>
+			<div class="txt_web" id="maintxt" style="display: none;">
+				<iframe id="pageFrame1" src="http://www.baidu.com" frameborder="0"
+					height="100%" width="100%"></iframe>
+			</div>
+			<!-- 第二个浏览器 -->
+		</div>
+		<div
+			style="float: left; margin-top: 202px; margin-left: 5px; width: 5px; height: 50px; background: #003f66; top: 250px; cursor: pointer;">
+			<img src="images/yc.jpg" id="btn" onclick="showOrHide(this);">
+		</div>
+		<form
+			action="saveResourceInfo.do?sid=7F39F8317FBDB1988EF4C628EBA02591"
+			method="post" id="resourceFrom">
+			<div class="right_edit" id="contentdiv">
+				<input name="uploadUrlName" id="uploadUrlName" type="hidden">
+				<input name="resourceId" id="resourceId" value="" type="hidden">
+				<ul class="tb">
+					<li><span class="w_e1">选择栏目</span><span><select
+							class="w_e2" id="columnIds" name="columnIds">
+								<option value="-1">---请选择---</option>
+
+								<option value="184">职场关注</option>
+
+								<option value="185">职业规划</option>
+
+								<option value="186">职场攻略</option>
+
+								<option value="187">求职晋升</option>
+
+								<option value="188">职场情商</option>
+
+								<option value="189">尚品生活</option>
+
+						</select></span></li>
+					<li><span class="w_e1">文章标题</span><span><input
+							class="w_e2" value="" id="resourceTitle" name="resourceTitle"
+							maxlength="50" type="text"></span></li>
+					<li><span class="w_e1">文章简介</span>
+					<textarea name="resourcePrc" id="resourcePrc" maxlength="50"
+							class="w_e3" rows="2" style="height: 26px;"
+							onkeypress="doKeypress()" onkeydown="doKeydown()"
+							onbeforepaste="doBeforePaste()" onpaste="doPaste()"></textarea></li>
+					<li><span class="w_e1">收费类型</span><span><input
+							name="price" value="0.00" checked="" type="radio">免费<input
+							name="price" value="20.00" type="radio">收费</span></li>
+					<li><div style="width: 462px;"
+							class="ke-container ke-container-default">
+							<div unselectable="on" class="ke-toolbar" style="display: block;">
+								<span class="ke-outline" data-name="source" title="HTML代码"
+									unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-source"
+									unselectable="on"></span></span><span
+									class="ke-inline-block ke-separator"></span><span
+									class="ke-outline" data-name="undo" title="后退(Ctrl+Z)"
+									unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-undo"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="redo" title="前进(Ctrl+Y)" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-redo"
+									unselectable="on"></span></span><span
+									class="ke-inline-block ke-separator"></span><span
+									class="ke-outline" data-name="preview" title="预览"
+									unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-preview"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="print" title="打印(Ctrl+P)" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-print"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="template" title="插入模板" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-template"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="code" title="插入程序代码" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-code"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="cut" title="剪切(Ctrl+X)" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-cut"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="copy" title="复制(Ctrl+C)" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-copy"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="paste" title="粘贴(Ctrl+V)" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-paste"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="plainpaste" title="粘贴为无格式文本" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-plainpaste"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="wordpaste" title="从Word粘贴" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-wordpaste"
+									unselectable="on"></span></span><span
+									class="ke-inline-block ke-separator"></span><span
+									class="ke-outline" data-name="justifyleft" title="左对齐"
+									unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-justifyleft"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="justifycenter" title="居中" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-justifycenter"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="justifyright" title="右对齐" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-justifyright"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="justifyfull" title="两端对齐" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-justifyfull"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="insertorderedlist" title="编号" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-insertorderedlist"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="insertunorderedlist" title="项目符号" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-insertunorderedlist"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="indent" title="增加缩进" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-indent"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="outdent" title="减少缩进" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-outdent"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="subscript" title="下标" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-subscript"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="superscript" title="上标" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-superscript"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="clearhtml" title="清理HTML代码" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-clearhtml"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="quickformat" title="一键排版" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-quickformat"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="selectall" title="全选(Ctrl+A)" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-selectall"
+									unselectable="on"></span></span><span
+									class="ke-inline-block ke-separator"></span><span
+									class="ke-outline" data-name="fullscreen" title="全屏显示(Esc)"
+									unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-fullscreen"
+									unselectable="on"></span></span>
+								<div class="ke-hr"></div>
+								<span class="ke-outline" data-name="formatblock" title="段落"
+									unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-formatblock"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="fontname" title="字体" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-fontname"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="fontsize" title="文字大小" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-fontsize"
+									unselectable="on"></span></span><span
+									class="ke-inline-block ke-separator"></span><span
+									class="ke-outline" data-name="forecolor" title="文字颜色"
+									unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-forecolor"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="hilitecolor" title="文字背景" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-hilitecolor"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="bold" title="粗体(Ctrl+B)" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-bold"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="italic" title="斜体(Ctrl+I)" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-italic"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="underline" title="下划线(Ctrl+U)" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-underline"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="strikethrough" title="删除线" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-strikethrough"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="lineheight" title="行距" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-lineheight"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="removeformat" title="删除格式" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-removeformat"
+									unselectable="on"></span></span><span
+									class="ke-inline-block ke-separator"></span><span
+									class="ke-outline" data-name="image" title="图片"
+									unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-image"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="multiimage" title="批量图片上传" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-multiimage"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="flash" title="Flash" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-flash"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="media" title="视音频" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-media"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="insertfile" title="插入文件" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-insertfile"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="table" title="表格" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-table"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="hr" title="插入横线" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-hr"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="emoticons" title="插入表情" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-emoticons"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="baidumap" title="百度地图" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-baidumap"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="pagebreak" title="插入分页符" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-pagebreak"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="anchor" title="锚点" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-anchor"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="link" title="超级链接" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-link"
+									unselectable="on"></span></span><span class="ke-outline"
+									data-name="unlink" title="取消超级链接" unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-unlink"
+									unselectable="on"></span></span><span
+									class="ke-inline-block ke-separator"></span><span
+									class="ke-outline" data-name="about" title="关于"
+									unselectable="on"><span
+									class="ke-toolbar-icon ke-toolbar-icon-url ke-icon-about"
+									unselectable="on"></span></span>
+							</div>
+							<div class="ke-edit" style="display: block; height: 144px;">
+								<iframe style="width: 100%; height: 144px;"
+									class="ke-edit-iframe" hidefocus="true" frameborder="0"></iframe>
+								<textarea style="width: 100%; height: 144px; display: none;"
+									class="ke-edit-textarea" hidefocus="true"></textarea>
+							</div>
+							<div class="ke-statusbar">
+								<span class="ke-inline-block ke-statusbar-center-icon"></span><span
+									class="ke-inline-block ke-statusbar-right-icon"></span>
+							</div>
+						</div>
+						<textarea name="" cols="" rows="" id="rttxta"
+							style="height: 250px; display: none;"></textarea></li>
+					<li><em class="ylfs prompt_index_step11"> <a
+							href="javascript:void(0)" onclick="showWindow('light');">发送</a></em> <em
+						class="ylbc prompt_index_step12"><a href="javascript:void(0)"
+							onclick="showWindow('light2');">保存</a></em></li>
+				</ul>
+
+			</div>
+		</form>
+	</div>
+
+	<div
+		style="padding: 0px; border: 0px none; display: none; top: 10px; width: 1000px; left: 211.5px; z-index: 9002;"
+		class="panel window">
+		<div style="width: 1000px;"
+			class="panel-header panel-header-noborder window-header">
+			<div class="panel-title">电话薄--导入联系人</div>
+			<div class="panel-tool">
+				<a class="panel-tool-close" href="javascript:void(0)"></a>
+			</div>
+		</div>
+		<div class="panel-body panel-body-noborder window-body" title=""
+			id="phoneDiv" style="width: 998px; height: 600px;">
+			<iframe src="importPhoneBook.do?sid=7F39F8317FBDB1988EF4C628EBA02591"
+				marginheight="0" marginwidth="0" id="phoneBook" name="phoneBook"
+				scrolling="auto" frameborder="0" height="100%" width="100%"></iframe>
+		</div>
+	</div>
+	<div
+		style="display: none; left: 211.5px; top: 10px; z-index: 9001; width: 1000px; height: 22px;"
+		class="window-shadow"></div>
+	<div
+		style="width: 1423px; height: 588px; display: none; z-index: 9000;"
+		class="window-mask"></div>
+	<div
+		style="padding: 0px; border: 0px none; display: none; top: 70px; width: 700px; left: 361.5px; z-index: 9005;"
+		class="panel window">
+		<div
+			class="panel-body panel-body-noheader panel-body-noborder window-body window-body-noheader"
+			title="" id="excel"
+			style="overflow: hidden; width: 698px; height: 348px;">
+			<iframe id="excelIframe"
+				src="resourceUploadFile.do?sid=7F39F8317FBDB1988EF4C628EBA02591"
+				marginheight="0" marginwidth="0" scrolling="no" frameborder="0"
+				height="350px" width="700px"></iframe>
+		</div>
+	</div>
+	<div
+		style="display: none; left: 361.5px; top: 70px; z-index: 9004; width: 700px; height: 0px;"
+		class="window-shadow"></div>
+	<div
+		style="width: 1423px; height: 588px; display: none; z-index: 9003;"
+		class="window-mask"></div>
+</body>
+</html>

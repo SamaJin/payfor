@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/ccdms/js/timeout.js"></script>
+<script type="text/javascript">
+	var report_name_store;
+	var grid_report_list;
+	var toolbar_search;
+	var viewport_main;
+	
+	var result_model = "";
+	var store_report_column_data;
+	
+	Ext.onReady(function() {
+		Ext.define('model_report_name', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'rule_name',
+				type : 'string',
+			}, {
+				name : 'rule_remark',
+				type : 'string',
+			} ]
+		});
+		//--
+		report_name_store = Ext.create('Ext.data.Store', {
+			model : 'model_report_name',
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/reportNameList.do',
+				reader : {
+					type : 'json',
+					root : 'rows',
+				}
+			}
+		});
+		
+		//--
+		init_search();
+		grid_report_list = Ext.create('Ext.grid.Panel', {
+			tbar : toolbar_search,
+			columns : [],
+		});
+		
+		viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_report_list ],
+		});
+	});
+	//--
+	function init_search() {
+		toolbar_search = Ext.create('Ext.toolbar.Toolbar', {
+			items : [ {
+				xtype : 'combo',
+				id : 'input_report_name',
+				fieldLabel : '&nbsp;报表名称',
+				store : report_name_store,
+				displayField : 'rule_name',
+				valueField : 'id',
+				labelWidth : 60,
+				queryMode : 'local',
+				listeners : {
+                    beforequery : function(e){
+                    	var combo = e.combo;
+                		if(!e.forceAll){
+                			var value = e.query;
+                			combo.store.filterBy(function(record,id){
+                				var text = record.get(combo.displayField);
+                				return (text.indexOf(value)!=-1);
+                			});
+                			combo.expand();
+                			return false;
+                		}
+                    }
+                }
+			}, {
+				xtype : 'datefield',
+				id : 'input_start_time',
+				fieldLabel : '&nbsp;开始时间',
+				format : 'Y-m-d',
+				labelWidth : 60,
+				selectOnFocus : true,
+			}, {
+				xtype : 'datefield',
+				id : 'input_end_time',
+				fieldLabel : '&nbsp;结束时间',
+				format : 'Y-m-d',
+				labelWidth : 60,
+				selectOnFocus : true,
+			}, '->', {
+				text : '查询',
+				width : 50,
+				icon : '/ccdms/extui/resources/icons/magnifier.png',
+				handler : function() {
+					search();
+				}
+			}, {
+				text : '导出',
+				width : 50,
+				icon : '/ccdms/extui/resources/icons/arrow_down.png',
+				handler : function() {
+					var report_id = Ext.getCmp('input_report_name').getValue();
+					var start_time = Ext.getCmp('input_start_time').getRawValue();
+					var end_time = Ext.getCmp('input_end_time').getRawValue();
+					var param = "?report_id="+report_id;
+					param += "&start_time="+start_time;
+					param += "&end_time="+end_time;
+					window.location.href = "/ccdms/downloadReportExcel.do"+param;
+				}
+			} ],
+		});
+	}
+	//--
+	function search() {
+		Ext.Ajax.request({
+			url : '/ccdms/getManageReportColumn.do',
+			params : {
+				'report_id' : Ext.getCmp('input_report_name').getValue(),
+			},
+			success : function(response) {
+				result_model = response.responseText;
+				show_body();
+			},
+		});
+	}
+	//--
+	function show_body() {
+		Ext.define('model_report_column', {
+			extend : 'Ext.data.Model',
+			fields : Ext.decode(result_model).modelBeanList,
+		});
+		
+		var report_id = Ext.getCmp('input_report_name').getValue();
+		var start_time = Ext.getCmp('input_start_time').getRawValue();
+		var end_time = Ext.getCmp('input_end_time').getRawValue();
+		var params = "?report_id="+report_id; 
+		params += "&start_time="+start_time;
+		params += "&end_time="+end_time;
+		
+		store_report_column_data = Ext.create('Ext.data.Store', {
+			pageSize : 20,
+			model : model_report_column,
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/getReportData.do'+params,
+				reader : {
+					type : 'json',
+					root : 'rows',
+					totalProperty : 'total',
+				}
+			}
+		});
+		
+		//主界面
+		grid_report_list = Ext.create('Ext.grid.Panel', {
+			tbar : toolbar_search,
+			stripeRows : true,
+			store : store_report_column_data,
+			columnLines : true,
+			loadMask : true,
+			columns : Ext.decode(result_model).columnBeanList,
+			bbar : Ext.create('Ext.toolbar.Paging', {
+				store : store_report_column_data,
+				displayInfo : true,
+			}),
+		});
+		//入口
+		viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_report_list ],
+		});
+	}
+	
+</script>
+</head>
+<body>
+</body>
+</html>

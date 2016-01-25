@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="window_record_data" extends="json-default" namespace="/">		
+		<action name="initListRecordDataWin" class="com.helphand.ccdms.actions.manage_record_data" method="init_list_record_data">
+			<result>/pages/window_record_data.jsp</result>
+		</action>
+		<action name="listRecordDataWin" class="com.helphand.ccdms.actions.manage_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="auditionRecordDataWin" class="com.helphand.ccdms.actions.manage_record_data" method="audition_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+	</package>
+</struts>

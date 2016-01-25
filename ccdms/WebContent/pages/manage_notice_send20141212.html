@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/ccdms/js/timeout.js"></script>
+<script type="text/javascript">
+	
+	Ext.onReady(function () {
+		//--
+		var notice_list_panel = Ext.create('Ext.grid.Panel', {
+			title: '通知信息',
+		    columns : [ {
+		    	text : '标识', 
+		    }, {
+		    	text : '消息内容',
+		    	flex : 1,
+		    }, {
+		    	text : '备注', 
+		    }, {
+		    	text : '操作',
+		    	align : 'right',
+		    	renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+		    		var result = "<a href='#'>用户</a>&nbsp;&nbsp;";
+		    		result += "<a href='#'>修改</a>&nbsp;&nbsp;";
+		    		result += "<a href='#'>发布</a>&nbsp;&nbsp;";
+		    		return result;
+				}
+		    } ],
+		    bbar : Ext.create('Ext.toolbar.Paging', {
+				displayInfo : true,
+			}),
+			tools : [ {
+				type : 'plus',
+				handler : function() {
+					alert(1);
+				}
+			}],
+		});
+	    
+	    var viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ notice_list_panel ],
+		});
+	});
+</script>
+</head>
+<body></body>
+</html>

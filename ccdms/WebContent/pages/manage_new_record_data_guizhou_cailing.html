@@ -1,0 +1,579 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<!-- 贵州彩铃录音查询页面 -->
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all-gray.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/ccdms/js/timeout.js"></script>
+<script type="text/javascript" src="/ccdms/js/callin_order_logs.js"></script>
+<script type="text/javascript">
+	var grid_record;
+	var store_grid_record;
+	var viewport_main;
+	var window_audition_record;
+	//--
+	Ext.define('model_record', {
+		extend : 'Ext.data.Model',
+		fields : [ {
+			name : 'id',
+			type : 'String'
+		}, {
+			name : 'agent_code',
+			type : 'string'
+		}, {
+			name : 'caller_number',
+			type : 'string'
+		}, {
+			name : 'orig_caller_number',
+			type : 'string'
+		}, {
+			name : 'called_number',
+			type : 'string'
+		}, {
+			name : 'orig_called_number',
+			type : 'string'
+		}, {
+			name : 'file_name',
+			type : 'string'
+		}, {
+			name : 'start_time',
+			type : 'string'
+		}, {
+			name : 'end_time',
+			type : 'string'
+		}, {
+			name : 'is_check',
+			type : 'int'
+		} ]
+	});
+	//--
+	Ext.onReady(function() {
+		grid_record = Ext.create('Ext.grid.Panel', {
+			store : store_grid_record,
+			columnLines : true,
+			rowLines : true,
+			loadMask : true,
+			viewConfig : {
+				stripeRows : true,
+				enableTextSelection : true
+			},
+			columns : [ {
+				text : '工号',
+				dataIndex : 'agent_code',
+			}, {
+				text : '文件名称',
+				dataIndex : 'file_name',
+				selectable : true,
+			}, {
+				text : '源主叫',
+				dataIndex : 'orig_caller_number'
+			}, {
+				text : '主叫',
+				dataIndex : 'caller_number'
+			}, {
+				text : '源被叫',
+				dataIndex : 'orig_called_number'
+			}, {
+				text : '被叫',
+				dataIndex : 'called_number'
+			}, {
+				text : '开始时间',
+				dataIndex : 'start_time',
+				width : 120,
+			}, {
+				text : '结束时间',
+				dataIndex : 'end_time',
+				width : 120,
+			}, {
+				text : '质检',
+				width : 50,
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var result = "<font color='red'>否</font>";
+					if(record.data["is_check"] == 1) {
+						result = "<font color='greed'>是</font>";
+					}
+					return result;
+				}
+			}, {
+				text : '操作',
+				sortable : false,
+				width : 130,
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = '';
+					str += '<a href="#" onClick="open_audition_record_window(\'' + record.data["file_name"] + '\')">试听</a>&nbsp;&nbsp;';
+					str += '<a href="#" onClick="action_download_record(\'' + record.data["file_name"] + '\')">下载</a>&nbsp;&nbsp;';
+					str += '<a href="#" onClick=open_recording_check_window('+ record.data["id"] +')>质检</a>&nbsp;&nbsp;';
+					str += '<a href="#" onClick=show_callin_logs_list("0851",'+ record.data["orig_caller_number"] +')>记录</a>&nbsp;&nbsp;';
+					return str;
+				}
+			} ],
+			bbar : Ext.create('Ext.toolbar.Paging', {
+				store : store_grid_record,
+				displayInfo : true
+			}),
+			tbar : Ext.create('Ext.toolbar.Toolbar', {
+				store : store_grid_record,
+				items : [ {
+					xtype : 'textfield',
+					id : 'input_agent_code',
+					fieldLabel : '工号111',
+					labelWidth : 30,
+					labelAlign : 'right',
+					width : 80,
+				}, {
+					xtype : 'textfield',
+					id : 'input_caller_number',
+					fieldLabel : '用户',
+					labelWidth : 40,
+					labelAlign : 'right',
+					width : 130,
+				}, {
+					xtype : 'datefield',
+					id : 'input_start_time',
+					fieldLabel : '时间起',
+					format : 'Y-m-d',
+					labelWidth : 40,
+					selectOnFocus : true,
+					labelAlign : 'right',
+					width : 150,
+				}, {
+					xtype : 'datefield',
+					id : 'input_end_time',
+					fieldLabel : '时间止',
+					format : 'Y-m-d',
+					labelWidth : 40,
+					selectOnFocus : true,
+					labelAlign : 'right',
+					width : 150,
+				}, '->', {
+					text : '搜索',
+					icon : '/ccdms/extui/resources/icons/magnifier.png',
+					handler : function() {
+						store_grid_record.on('beforeload', function() {
+							Ext.apply(store_grid_record.proxy.extraParams, {
+								agent_code : Ext.getCmp('input_agent_code').getValue(),
+								caller_number : Ext.getCmp('input_caller_number').getValue(),
+								called_number : '12559980',
+								search_flag : '5',
+								start_time : Ext.Date.format(Ext.getCmp('input_start_time').getValue(), 'Y-m-d H:i:s'),
+								end_time : Ext.Date.format(Ext.getCmp('input_end_time').getValue(), 'Y-m-d H:i:s'),
+							});
+						});
+						store_grid_record.loadPage(1);
+						//store_grid_record.load();
+					}
+				}, {
+					text : '重置',
+					icon : '/ccdms/extui/resources/icons/arrow_rotate_clockwise.png',
+					handler : function() {
+						Ext.getCmp('input_agent_code').setValue('');
+						Ext.getCmp('input_caller_number').setValue('');
+						Ext.getCmp('input_start_time').setValue('');
+						Ext.getCmp('input_end_time').setValue('');
+					},
+				} ]
+			}),
+		});
+		grid_record.show();
+		//--
+		viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_record ],
+		});
+	});
+
+	//--
+	//--
+	store_grid_record = Ext.create('Ext.data.Store', {
+		model : 'model_record',
+		autoLoad : false,
+		proxy : {
+			type : 'ajax',
+			url : '/ccdms/listNewRecordDataGuizhouCailing.do',
+			reader : {
+				type : 'json',
+				root : 'rows',
+				totalProperty : 'total'
+			},
+		}
+	});
+	//--
+
+	function open_audition_record_window(fname) {
+		Ext.Ajax.request({
+			url : '/ccdms/auditionRecordData.do?file_path=' + fname,
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					window_audition_record = Ext.create('Ext.window.Window', {
+						title : '录音播放',
+						autoShow : true,
+						width : 400,
+						height : 150,
+						//modal : true,
+						html : '<embed name="audioplayer" id="audioplayer" src="'+result.out_file_path+'" type="audio/x-wav" hidden="false"  width="400" height="150"  autostart="true" loop="false" /></embed/>',
+					});
+				}
+			}
+		});
+	}
+
+	function action_download_record(fname) {
+		Ext.Ajax.request({
+			url : '/ccdms/downloadNewRecordData.do?file_path=' + fname,
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					window.location.href = result.out_file_path;
+				}
+			}
+		});
+	}
+	
+	//质检
+	function open_recording_check_window(recording_id) {
+		
+		//
+		Ext.Ajax.request({
+			url : '/ccdms/modifyCheckStatus.do?recording_id='+recording_id,
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					var check_result_id = result.check_result_id;//质检结果ID
+					//store_grid_record.reload();
+					Ext.Ajax.request({
+						url : '/ccdms/infoCommonsRecordsList.do?recording_id='+recording_id,
+						success : function(resp, opts) {
+							var result = Ext.decode(resp.responseText);
+							if (result.return_status == 'success') {
+								var bean = result.return_bean;
+								recording_check_window(check_result_id,bean);
+							}else {
+								Ext.Msg.show({
+									title : '错误',
+									msg : result.return_describe,
+									buttons : Ext.Msg.YES,
+									icon : Ext.Msg.ERROR
+								});
+							}
+						}
+					});
+				}else {
+					Ext.Msg.show({
+						title : '消息',
+						msg : "已经质检",
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.INFO
+					});
+				}
+			}
+		});
+	}
+	
+	//质检数据窗口
+	function recording_check_window(check_result_id,bean) {
+		var call_type,recording_type;
+		
+		//外呼、呼入
+		if(bean.called_number == "07311255993") {
+			call_type = "江西彩铃"; recording_type = "呼入";
+		}else if(bean.called_number == "12559980") {
+			call_type = "贵州彩铃"; recording_type = "呼入";
+		}else if(bean.orig_caller_number == "07319521251") {
+			call_type = "人保外呼"; recording_type = "外呼"; 
+		}else { 
+			recording_type = "外呼";
+		}
+		
+		window_recording_check = Ext.create('Ext.window.Window', {
+			title : '质检录音',
+			width : 500,
+			height : 350,
+			autoShow : true,
+			modal : true,
+			bodyPadding : 10,
+			buttonAlign : 'center',
+			layout : {
+				type: 'table',
+		        columns: 2,
+			},
+			defaults : {
+				labelWidth : 70,
+			},
+			items : [ {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;工号',
+				readOnly : true,
+				value : bean.agent_code,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;录音时间',
+				readOnly : true,
+				value : bean.start_time,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;源主叫',
+				readOnly : true,
+				value : bean.orig_caller_number,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;主叫',
+				readOnly : true,
+				value : bean.caller_number,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;源被叫',
+				readOnly : true,
+				value : bean.orig_called_number,
+			}, {
+				xtype : 'textfield',
+				fieldLabel : '&nbsp;&nbsp;被叫',
+				readOnly : true,
+				value : bean.called_number,
+			}, {
+				xtype : 'textfield',
+				id : 'input_recording_type',
+				fieldLabel : '&nbsp;&nbsp;录音类型',
+				readOnly : true,
+				value : recording_type,
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;业务范围',
+				id : 'input_call_type',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+					    {"name" : "江西彩铃","value" : "江西彩铃"}, 
+					    {"name" : "贵州彩铃","value" : "贵州彩铃"},
+					    {"name" : "人保外呼","value" : "人保外呼"} 
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				value : call_type,
+				hidden : true,
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;业务类型',
+				id : 'input_callout_call_type',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+					    {"name" : "江西铃音盒","value" : "江西铃音盒"}, 
+					    {"name" : "九江铃音盒","value" : "九江铃音盒"}, 
+					    {"name" : "贵州联通5元《掌上MBA》","value" : "贵州联通5元《掌上MBA》"},
+					    {"name" : "江西环球时报","value" : "江西环球时报"},
+					    {"name" : "宝鸡环球时报","value" : "宝鸡环球时报"},
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				hidden : false,
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;业务类型',
+				id : 'input_callin_call_type',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+					    {"name" : "业务办理类","value" : "业务办理类"}, 
+					    {"name" : "咨询类","value" : "咨询类"}, 
+					    {"name" : "查询类","value" : "查询类"},
+					    {"name" : "其他类","value" : "其他类"},
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				hidden : true,
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;差错类型',
+				id : 'input_error_type',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+					    {"name":"请选择", "value":""}, {"name":"无差错", "value":"无差错"}, 
+					    {"name":"非严重性差错", "value":"非严重性差错"}, {"name":"严重性差错", "value":"严重性差错"},
+					    {"name":"致命性差错", "value":"致命性差错"} 
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				editable : false,
+				value : "",
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;考核类别',
+				id : 'input_callout_check_type',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+					    {"name" : "请选择","value" : ""},{"name" : "规范话术","value" : "规范话术"},
+					    {"name" : "问候语","value" : "问候语"},{"name" : "普通话","value" : "普通话"},
+					    {"name" : "电话礼仪","value" : "电话礼仪"},{"name" : "倾听技巧","value" : "倾听技巧"},
+					    {"name" : "语气语速","value" : "语气语速"},{"name" : "服务态度","value" : "服务态度"},
+					    {"name" : "表达技巧","value" : "表达技巧"},{"name" : "控制能力","value" : "控制能力"},
+					    {"name" : "业务受理","value" : "业务受理"},{"name" : "有效挽留","value" : "有效挽留"},
+					    {"name" : "销售意识","value" : "销售意识"},{"name" : "结束语","value" : "结束语"},
+					    {"name" : "工作态度","value" : "工作态度"},{"name" : "核实客户","value" : "核实客户"},
+					    {"name" : "业务介绍","value" : "业务介绍"},{"name" : "资费介绍","value" : "资费介绍"},
+					    {"name" : "再次确认","value" : "再次确认"},{"name" : "诈单","value" : "诈单"},
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				editable : false,
+				hidden : false,
+				value : "",
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;考核类别',
+				id : 'input_callin_check_type',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+					    {"name" : "请选择","value" : ""},{"name" : "规范话术","value" : "规范话术"},
+					    {"name" : "普通话","value" : "普通话"},{"name" : "语气语速","value" : "语气语速"},
+					    {"name" : "电话礼仪","value" : "电话礼仪"},{"name" : "等候关怀","value" : "等候关怀"},
+					    {"name" : "询问技巧","value" : "询问技巧"},{"name" : "表达技巧","value" : "表达技巧"},
+					    {"name" : "倾听技巧","value" : "倾听技巧"},{"name" : '服务态度', "value" : '服务态度'},
+					    {"name" : '工作态度', "value" : '工作态度'},{"name" : '业务介绍', "value" : '业务介绍'},
+						{"name" : '业务办理差错', "value" : '业务办理差错'},{"name" : '推诿客户', "value" : '推诿客户'},
+						{"name" : '主动营销', "value" : '主动营销'},{"name" : '引导技巧/有效挽留', "value" : '引导技巧/有效挽留'},
+						{"name" : '普通投诉', "value" : '普通投诉'},{"name" : '升级投诉', "value" : '升级投诉'},
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				editable : false,
+				hidden : false,
+				value : "",
+			}, {
+				xtype : 'combo',
+				fieldLabel : '&nbsp;&nbsp;质检评分',
+				id : 'input_check_result',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+						{"name" : "0","value" : "0"},
+						{"name" : "50","value" : "50"}, 
+						{"name" : "80","value" : "80"},
+						{"name" : "95","value" : "95"},
+						{"name" : "100","value" : "100"},
+						{"name" : "105","value" : "105"} 
+					]
+				}),
+				colspan : 2,
+				displayField : 'name',
+				valueField : 'value',
+			}, {
+				xtype : 'textarea',
+				id : 'input_result_describe',
+				fieldLabel : '&nbsp;&nbsp;质检评语',
+				colspan : 2,
+				width : 450,
+				height : 100,
+			} ],
+			buttons : [{
+				text : '提交',
+				handler : function() {
+					var recording_type = Ext.getCmp("input_recording_type").value;
+					//var call_type = Ext.getCmp("input_call_type").getRawValue();
+					var call_type = "贵州彩铃";
+					var error_type = Ext.getCmp("input_error_type").value;
+					var check_result = Ext.getCmp("input_check_result").getRawValue();
+					check_result = check_result.replace(/(^\s*)|(\s*$)/g, "");//去空格
+					
+					var result_describe = Ext.getCmp("input_result_describe").value;
+					var callin_type = Ext.getCmp("input_callin_check_type").value;
+					var callout_type = Ext.getCmp("input_callout_check_type").value;
+					var callin_call_type = Ext.getCmp("input_callin_call_type").getRawValue();
+					var callout_call_type = Ext.getCmp("input_callout_call_type").getRawValue();
+					
+					var check_type = "";
+					if(callout_type != "") check_type = callout_type;
+					else check_type = callin_type;
+					
+					var call_leaf_type = "";
+					if(callin_call_type != "") call_leaf_type = callin_call_type;
+					else call_leaf_type = callout_call_type;
+					
+					save_recording_check_result(check_result_id,bean,recording_type,call_type,call_leaf_type,
+						error_type,check_type,check_result,result_describe);
+				}
+			}]
+		});
+		
+		//呼入、外呼
+		if(recording_type == "呼入") { 
+			Ext.getCmp("input_callin_check_type").show();
+			Ext.getCmp("input_callout_check_type").hide();
+
+			Ext.getCmp("input_callin_call_type").show();
+			Ext.getCmp("input_callout_call_type").hide();
+		}else {
+			Ext.getCmp("input_callout_check_type").show();
+			Ext.getCmp("input_callin_check_type").hide();
+			
+			Ext.getCmp("input_callout_call_type").show();
+			Ext.getCmp("input_callin_call_type").hide();
+		}
+		
+		window_recording_check.show();
+	}
+	
+	//保存质检结果
+	function save_recording_check_result(check_result_id,bean,recording_type,call_type,call_leaf_type,
+		error_type,check_type,check_result,result_describe) {
+		
+		Ext.Ajax.request({
+			url : '/ccdms/saveRecordingCheckResult.do',
+			params : {
+				'check_result.id' : check_result_id,                   //质检结果ID
+				'check_result.agent_id' : bean.agent_code,             //工号
+				'check_result.recording_time' : bean.start_time,       //录音时间
+				'check_result.origcaller' : bean.orig_caller_number,   //源主叫
+				'check_result.origcalled' : bean.orig_called_number,   //源被叫
+				'check_result.caller' : bean.caller_number,            //主叫
+				'check_result.called' : bean.called_number,            //被叫
+				'check_result.recording_id' : bean.id,                 //录音ID
+				'check_result.file_name' : bean.file_name,             //录音文件
+				
+				'check_result.recording_type' : recording_type,       //录音类型
+				'check_result.call_type' : call_type,                 //业务范围
+				'check_result.call_leaf_type' : call_leaf_type,       //业务类型
+				'check_result.error_type' : error_type,               //差错类型
+				'check_result.check_type' : check_type,               //考核类别
+				'check_result.check_result' : check_result,           //评分
+				'check_result.result_describe' : result_describe,     //评语
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					window_recording_check.close();
+					Ext.Msg.show({
+						title : '消息',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.INFO
+					});
+				}else {
+					Ext.Msg.show({
+						title : '错误',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.ERROR
+					});
+				}
+			}
+		});
+	}
+	
+</script>
+</head>
+<body>
+
+</body>
+</html>

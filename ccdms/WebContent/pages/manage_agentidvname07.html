@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/ccdms/js/timeout.js"></script>
+<script type="text/javascript">
+	
+	var viewport_main;
+	var grid_agentidvname;
+	var store_grid_agentidvname;
+	var window_modify_agentidvname;
+	var window_search_agentidvname;
+	//--
+	Ext.define('model_agentidvname', {
+		extend : 'Ext.data.Model',
+		fields : [ {
+			name : 'agentid',
+			type : 'string'
+		}, {
+			name : 'username',
+			type : 'string'
+		}, {
+			name : 'teamname',
+			type : 'string'
+		} ]
+	});
+	//--
+	store_grid_agentidvname = Ext.create('Ext.data.Store', {
+		model : 'model_agentidvname',
+		autoLoad : false,
+		proxy : {
+			type : 'ajax',
+			url : '/ccdms/listAgentidvsname.do',
+			reader : {
+				type : 'json',
+				root : 'rows',
+				totalProperty : 'total'
+			}
+		}
+	});
+	//--
+	Ext.onReady(function() {
+		grid_agentidvname = Ext.create('Ext.grid.Panel', {
+			title : '员工信息',
+			store : store_grid_agentidvname,
+			columnLines : true,
+			rowLines : true,
+			loadMask : true,
+			columns : [ {
+				text : '工号',
+				dataIndex : 'agentid',
+			}, {
+				text : '姓名',
+				dataIndex : 'username',
+			}, {
+				text : '团队',
+				dataIndex : 'teamname',
+			}, {
+				text : '操作',
+				sortable : false,
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = '';
+					str += '<a href="#" onClick="action_open_modify_agentidvname(' + record.data["id"] + ')">修改</a>&nbsp;&nbsp;';
+					str += '<a href="#" onClick="action_delete_agentidvname( ' + record.data["id"] + ' )">删除</a>';
+					return str;
+				}
+			} ],
+			bbar : Ext.create('Ext.toolbar.Paging', {
+				store : store_grid_agentidvname,
+				displayInfo : true
+			}),
+			tools : [ {
+				type : 'search',
+				handler : function() {
+
+				}
+			} ],
+		});
+		store_grid_agentidvname.load();
+		grid_agentidvname.show();
+		//--
+		viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_agentidvname ],
+		});
+	});
+	//--修改
+	function action_open_modify_agentidvname(agentid) {
+		Ext.Ajax.request({
+			url : '/ccdms/initModifyAgentidvsname.do',
+			params : {
+				agentid : agentid
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					window_modify_agentidvname = Ext.create('Ext.window.Window', {
+						title : '修改员工信息',
+						width : 400,
+						layout : 'form',
+						modal : true,
+						buttonAlign : 'center',
+						bodyPadding : 10,
+						items : [ {
+							xtype : 'textfield',
+							id : 'input_modify_username',
+							fieldLabel : '姓名',
+							allowBlank : false,
+							value : result.return_describe.username,
+							readOnly : true,
+						}, {
+							xtype : 'textfield',
+							id : 'input_modify_teamname',
+							fieldLabel : '团队',
+							allowBlank : false,
+							value : result.return_describe.teamname,
+						} ],
+						buttons : [ {
+							text : '修改',
+							handler : function() {
+								Ext.Ajax.request({
+									url : '/ccdms/modifyAgentidvsname.do',
+									params : {
+										agentid : agentid,
+										username : Ext.getCmp('input_modify_username').getValue(),
+										teamname : Ext.getCmp('input_modify_teamname').getValue()
+									},
+									success : function(resp, opts) {
+										var result = Ext.decode(resp.responseText);
+										if (result.return_status == 'success') {
+											store_grid_agentidvname.reload();
+											window_modify_agentidvname.close();
+											Ext.Msg.show({
+												title : '消息',
+												msg : result.return_describe,
+												buttons : Ext.Msg.YES,
+												icon : Ext.Msg.INFO
+											});
+										} else {
+											Ext.Msg.show({
+												title : '错误',
+												msg : result.return_describe,
+												buttons : Ext.Msg.YES,
+												icon : Ext.Msg.ERROR
+											});
+										}
+									}
+								});
+							},
+						} ],
+					});
+					window_modify_agentidvname.show();
+				}
+			}
+		});
+	}
+	//--
+	function action_delete_agentidvname(agentid) {
+		Ext.Msg.confirm('提示', '是否确定删除？', function(btn) {
+			if (btn == 'yes') {
+				Ext.Ajax.request({
+					url : '/ccdms/deleteAgentidvsname.do',
+					params : {
+						agentid : agentid
+					},
+					success : function(resp, opts) {
+						var result = Ext.decode(resp.responseText);
+						if (result.return_status == 'success') {
+							store_grid_agentidvname.reload();
+							Ext.Msg.show({
+								title : '消息',
+								msg : '删除成功!',
+								buttons : Ext.Msg.YES,
+								icon : Ext.Msg.INFO
+							});
+						} else {
+							Ext.Msg.show({
+								title : '错误',
+								msg : '删除失败!',
+								buttons : Ext.Msg.YES,
+								icon : Ext.Msg.ERROR
+							});
+						}
+					}
+				});
+			}
+		});
+	}
+</script>
+</head>
+<body></body>
+</html>

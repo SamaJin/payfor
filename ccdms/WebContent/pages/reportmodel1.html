@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+		<script type="text/javascript">
+		
+		var xmlHttp;
+		var statu = false;
+	function createXMLHttpRequest()
+	{
+		try{
+			xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		catch(e)
+		{
+			try{
+				xmlHttp = new XMLHttpRequest();
+			}
+			catch(e)
+			{
+				xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+			}
+		}
+	}
+
+	function startRequest(obj)
+	{
+		if(statu){
+			alert("数据正在跟新,请稍后操作.");
+			return ;
+		}
+		var date = obj.date.substr(0,10);
+		//alert(date);
+		createXMLHttpRequest();
+		var url = "http://192.168.3.4:8088/WebReportCreate/UpdateReport";
+		xmlHttp.open("post",url,true);
+		xmlHttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+    	xmlHttp.onreadystatechange = handleXMLHttpRequest;
+		xmlHttp.send("date="+date);
+		document.getElementById("msg").innerHTML  = "数据正在跟新";
+		statu = true;
+	}
+
+	function handleXMLHttpRequest()
+	{
+    		if(xmlHttp.readyState==4)
+    		{
+        			if(xmlHttp.status==200)
+        			{	
+        				statu = false;
+        				if(xmlHttp.responseText==1){
+        					//alert("跟新成功.");
+        					document.getElementById("msg").innerHTML  = "数据跟新结束";
+        				}else{
+        					alert("跟新失败.");
+        				}
+        				//alert(xmlHttp.responseText);
+        			}
+    		}
+ 	}
+		
+    </script>
+		<title>报表生成</title>
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta http-equiv="expires" content="0">
+		<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+		<meta http-equiv="description" content="This is my page">
+		<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+	</head>
+
+	<body>
+		<form action=""><div style="height:1000px">
+		<span style="align:left;width:70%;height:100%"><table border="1">
+				<tbody><tr>
+					<td>
+						报表名称
+					</td>
+					<td>
+						下载链接
+					</td>
+					<td>
+						操作
+					</td>
+				</tr>
+			
+				<tr>
+					<td>2016-01-01湖南外呼日报
+					</td>
+					<td>
+						<a href="../../ccdms/report/20160106.xls" target="_blank" onclick="savepic()">2016-01-01湖南外呼日报.xls</a>
+					</td>
+					<td>
+						<input value="更新报表" date="2016-01-01" onclick="startRequest(this)" type="button">
+					</td>
+				</tr>
+				
+				<tr>
+					<td>2016-01-02湖南外呼日报
+					</td>
+					<td>
+						<a href="../../ccdms/report/20160106.xls" target="_blank" onclick="savepic()">2016-01-02湖南外呼日报.xls</a>
+					</td>
+					<td>
+						<input value="更新报表" date="2016-01-02" onclick="startRequest(this)" type="button">
+					</td>
+				</tr>
+				
+				<tr>
+					<td>2016-01-03湖南外呼日报
+					</td>
+					<td>
+						<a href="../../ccdms/report/20160106.xls" target="_blank" onclick="savepic()">2016-01-03湖南外呼日报.xls</a>
+					</td>
+					<td>
+						<input value="更新报表" date="2016-01-03" onclick="startRequest(this)" type="button">
+					</td>
+				</tr>
+				
+				<tr>
+					<td>2016-01-04湖南外呼日报
+					</td>
+					<td>
+						<a href="../../ccdms/report/20160106.xls" target="_blank" onclick="savepic()">2016-01-04湖南外呼日报.xls</a>
+					</td>
+					<td>
+						<input value="更新报表" date="2016-01-04" onclick="startRequest(this)" type="button">
+					</td>
+				</tr>
+				
+				<tr>
+					<td>2016-01-05湖南外呼日报
+					</td>
+					<td>
+						<a href="../../ccdms/report/20160106.xls" target="_blank" onclick="savepic()">2016-01-05湖南外呼日报.xls</a>
+					</td>
+					<td>
+						<input value="更新报表" date="2016-01-05" onclick="startRequest(this)" type="button">
+					</td>
+				</tr>
+				
+				<tr>
+					<td>2016-01-06湖南外呼日报
+					</td>
+					<td>
+						<a href="../../ccdms/report/20160106.xls" target="_blank" onclick="savepic()">2016-01-06湖南外呼日报.xls</a>
+					</td>
+					<td>
+						<input value="更新报表" date="2016-01-06" onclick="startRequest(this)" type="button">
+					</td>
+				</tr>
+			</tbody></table></span><div id="msg" style="color:red;width:800px"></div></div>
+			
+		</form>
+	
+
+</body>
+</html>

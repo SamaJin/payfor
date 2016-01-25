@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_record_data" extends="interceptors" namespace="/">
+		<default-interceptor-ref name="stack_check_user"></default-interceptor-ref>
+		<action name="initListRecordData" class="com.helphand.ccdms.actions.manage_record_data" method="init_list_record_data">
+			<result>/pages/manage_new_record_data.html</result>
+		</action>
+		<action name="listRecordData" class="com.helphand.ccdms.actions.manage_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="auditionRecordData" class="com.helphand.ccdms.actions.manage_record_data" method="audition_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="downloadRecordData" class="com.helphand.ccdms.actions.manage_record_data" method="download_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+	<!-- 江西彩铃-->
+		<action name="initListRecordDataJiangxiCailing" class="com.helphand.ccdms.actions.manage_record_data" method="init_list_record_data">
+			<result>/pages/manage_record_data_jiangxi_cailing.html</result>
+		</action>
+		<action name="listRecordDataJiangxiCailing" class="com.helphand.ccdms.actions.manage_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		
+		<!-- 贵州彩铃-->
+		<action name="initListRecordDataGuizhouCailing" class="com.helphand.ccdms.actions.manage_record_data" method="init_list_record_data">
+			<result>/pages/manage_record_data_guizhou_cailing.html</result>
+		</action>
+		<action name="listRecordDataGuizhouCailing" class="com.helphand.ccdms.actions.manage_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<!-- 海普外呼-->
+		<action name="initListRecordDataHaipuCallout" class="com.helphand.ccdms.actions.manage_record_data" method="init_list_record_data">
+			<result>/pages/manage_record_data_haipu_callout.html</result>
+		</action>
+		<action name="listRecordDataHaipuCallout" class="com.helphand.ccdms.actions.manage_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<!-- 湖南人保外呼-->
+		<action name="initListRecordDataRenbaoHnCallout" class="com.helphand.ccdms.actions.manage_record_data" method="init_list_record_data">
+			<result>/pages/manage_record_data_renbao_callout.html</result>
+		</action>	  
+		<action name="listRecordDataRenbaoCallout" class="com.helphand.ccdms.actions.manage_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<!-- 赣州外呼-->
+		<action name="initListRecordDataGanzhouCallout" class="com.helphand.ccdms.actions.manage_record_data" method="init_list_record_data">
+			<result>/pages/manage_record_data_ganzhou_callout.html</result>
+		</action>
+		<action name="listRecordDataGanzhouCallout" class="com.helphand.ccdms.actions.manage_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<!-- 江西人保外呼-->  
+		<action name="initListRecordDataRenbaoJxCallout" class="com.helphand.ccdms.actions.manage_record_data" method="init_list_record_data">
+			<result>/pages/manage_record_data_jiangxirenbao_callout.html</result>
+		</action>
+		<action name="listRecordDataJiangxiRenbaoCallout" class="com.helphand.ccdms.actions.manage_record_data" method="list_record_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+					
+			
+		<action name="initCountReportDataAgent" class="com.helphand.ccdms.actions.manage_record_data" method="init_count_report_data_agent">
+			<result>/pages/manage_report_count_agent.html</result>
+		</action>		
+		<action name="countReportColumnAgent" class="com.helphand.ccdms.actions.manage_record_data" method="count_report_column_agent">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>		
+		<action name="countReportDataAgent" class="com.helphand.ccdms.actions.manage_record_data" method="count_report_data_agent">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>	
+		
+		<action name="intiListTimeRecord" class="com.helphand.ccdms.actions.manage_record_data" method="inti_list_time_record">
+			<result>/pages/list_time_record.html</result>
+		</action>
+		<action name="timeRecordColumn" class="com.helphand.ccdms.actions.manage_record_data" method="time_record_column">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="listTimeRecord" class="com.helphand.ccdms.actions.manage_record_data" method="list_time_record">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="recordTimeExcel" class="com.helphand.ccdms.actions.manage_record_data" method="record_time_excel">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="intreportmodel" class="com.helphand.ccdms.actions.manage_report_model" method="int_report_model">
+			<result>/pages/reportmodel.html</result>
+		</action>
+		
+		<action name="listreportmodel" class="com.helphand.ccdms.actions.manage_report_model" method="list_report_model">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+	</package>
+</struts>

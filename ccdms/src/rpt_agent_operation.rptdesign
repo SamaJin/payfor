@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Written by Eclipse BIRT 2.0 -->
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 1.0.1 Build &lt;20051201-1157></property>
+    <property name="units">cm</property>
+    <text-property name="displayName">话务员操作记录</text-property>
+    <list-property name="configVars">
+        <structure>
+            <property name="name">begindate</property>
+            <property name="value">2007-07-01</property>
+        </structure>
+        <structure>
+            <property name="name">enddate</property>
+            <property name="value">2007-07-02</property>
+        </structure>
+        <structure>
+            <property name="name">begintime</property>
+            <property name="value">00:00:00</property>
+        </structure>
+        <structure>
+            <property name="name">endtime</property>
+            <property name="value">23:59:59</property>
+        </structure>
+    </list-property>
+    <parameters>
+        <scalar-parameter name="begindate" id="6">
+            <text-property name="displayName">开始日期</text-property>
+            <text-property name="helpText">如：2006-01-01</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="promptText">开始日期</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">yyyy-mm-{dd-1}</property>
+        </scalar-parameter>
+        <scalar-parameter name="enddate" id="7">
+            <text-property name="displayName">结束日期</text-property>
+            <text-property name="helpText">如：2006-01-31</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="promptText">结束日期</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">yyyy-mm-{dd-1}</property>
+        </scalar-parameter>
+        <scalar-parameter name="begintime" id="1013">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="promptText">开始小时数</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">list-box</property>
+            <property name="mustMatch">false</property>
+            <property name="fixedOrder">true</property>
+            <property name="defaultValue">00:00:00</property>
+            <list-property name="selectionList">
+                <structure>
+                    <property name="value">00:00:00</property>
+                    <property name="label">00</property>
+                </structure>
+                <structure>
+                    <property name="value">01:00:00</property>
+                    <property name="label">01</property>
+                </structure>
+                <structure>
+                    <property name="value">02:00:00</property>
+                    <property name="label">02</property>
+                </structure>
+                <structure>
+                    <property name="value">03:00:00</property>
+                    <property name="label">03</property>
+                </structure>
+                <structure>
+                    <property name="value">04:00:00</property>
+                    <property name="label">04</property>
+                </structure>
+                <structure>
+                    <property name="value">05:00:00</property>
+                    <property name="label">05</property>
+                </structure>
+                <structure>
+                    <property name="value">06:00:00</property>
+                    <property name="label">06</property>
+                </structure>
+                <structure>
+                    <property name="value">07:00:00</property>
+                    <property name="label">07</property>
+                </structure>
+                <structure>
+                    <property name="value">08:00:00</property>
+                    <property name="label">08</property>
+                </structure>
+                <structure>
+                    <property name="value">09:00:00</property>
+                    <property name="label">09</property>
+                </structure>
+                <structure>
+                    <property name="value">10:00:00</property>
+                    <property name="label">10</property>
+                </structure>
+                <structure>
+                    <property name="value">11:00:00</property>
+                    <property name="label">11</property>
+                </structure>
+                <structure>
+                    <property name="value">12:00:00</property>
+                    <property name="label">12</property>
+                </structure>
+                <structure>
+                    <property name="value">13:00:00</property>
+                    <property name="label">13</property>
+                </structure>
+                <structure>
+                    <property name="value">14:00:00</property>
+                    <property name="label">14</property>
+                </structure>
+                <structure>
+                    <property name="value">15:00:00</property>
+                    <property name="label">15</property>
+                </structure>
+                <structure>
+                    <property name="value">16:00:00</property>
+                    <property name="label">16</property>
+                </structure>
+                <structure>
+                    <property name="value">17:00:00</property>
+                    <property name="label">17</property>
+                </structure>
+                <structure>
+                    <property name="value">18:00:00</property>
+                    <property name="label">18</property>
+                </structure>
+                <structure>
+                    <property name="value">19:00:00</property>
+                    <property name="label">19</property>
+                </structure>
+                <structure>
+                    <property name="value">20:00:00</property>
+                    <property name="label">20</property>
+                </structure>
+                <structure>
+                    <property name="value">21:00:00</property>
+                    <property name="label">21</property>
+                </structure>
+                <structure>
+                    <property name="value">22:00:00</property>
+                    <property name="label">22</property>
+                </structure>
+                <structure>
+                    <property name="value">23:00:00</property>
+                    <property name="label">23</property>
+                </structure>
+            </list-property>
+        </scalar-parameter>
+        <scalar-parameter name="endtime" id="1014">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="promptText">结束小时数</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">list-box</property>
+            <property name="mustMatch">false</property>
+            <property name="fixedOrder">true</property>
+            <property name="defaultValue">23:59:59</property>
+            <list-property name="selectionList">
+                <structure>
+                    <property name="value">00:59:59</property>
+                    <property name="label">00</property>
+                </structure>
+                <structure>
+                    <property name="value">01:59:59</property>
+                    <property name="label">01</property>
+                </structure>
+                <structure>
+                    <property name="value">02:59:59</property>
+                    <property name="label">02</property>
+                </structure>
+                <structure>
+                    <property name="value">03:59:59</property>
+                    <property name="label">03</property>
+                </structure>
+                <structure>
+                    <property name="value">04:59:59</property>
+                    <property name="label">04</property>
+                </structure>
+                <structure>
+                    <property name="value">05:59:59</property>
+                    <property name="label">05</property>
+                </structure>
+                <structure>
+                    <property name="value">06:59:59</property>
+                    <property name="label">06</property>
+                </structure>
+                <structure>
+                    <property name="value">07:59:59</property>
+                    <property name="label">07</property>
+                </structure>
+                <structure>
+                    <property name="value">08:59:59</property>
+                    <property name="label">08</property>
+                </structure>
+                <structure>
+                    <property name="value">09:59:59</property>
+                    <property name="label">09</property>
+                </structure>
+                <structure>
+                    <property name="value">10:59:59</property>
+                    <property name="label">10</property>
+                </structure>
+                <structure>
+                    <property name="value">11:59:59</property>
+                    <property name="label">11</property>
+                </structure>
+                <structure>
+                    <property name="value">12:59:59</property>
+                    <property name="label">12</property>
+                </structure>
+                <structure>
+                    <property name="value">13:59:59</property>
+                    <property name="label">13</property>
+                </structure>
+                <structure>
+                    <property name="value">14:59:59</property>
+                    <property name="label">14</property>
+                </structure>
+                <structure>
+                    <property name="value">15:59:59</property>
+                    <property name="label">15</property>
+                </structure>
+                <structure>
+                    <property name="value">16:59:59</property>
+                    <property name="label">16</property>
+                </structure>
+                <structure>
+                    <property name="value">17:59:59</property>
+                    <property name="label">17</property>
+                </structure>
+                <structure>
+                    <property name="value">18:59:59</property>
+                    <property name="label">18</property>
+                </structure>
+                <structure>
+                    <property name="value">19:59:59</property>
+                    <property name="label">19</property>
+                </structure>
+                <structure>
+                    <property name="value">20:59:59</property>
+                    <property name="label">20</property>
+                </structure>
+                <structure>
+                    <property name="value">21:59:59</property>
+                    <property name="label">21</property>
+                </structure>
+                <structure>
+                    <property name="value">22:59:59</property>
+                    <property name="label">22</property>
+                </structure>
+                <structure>
+                    <property name="value">23:59:59</property>
+                    <property name="label">23</property>
+                </structure>
+            </list-property>
+        </scalar-parameter>
+        <scalar-parameter name="operation" id="699">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="promptText">操作类型</property>
+            <property name="allowBlank">false</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">list-box</property>
+            <property name="mustMatch">false</property>
+            <property name="fixedOrder">true</property>
+            <property name="defaultValue">9999</property>
+            <list-property name="selectionList">
+                <structure>
+                    <property name="value">9999</property>
+                    <property name="label">全部</property>
+                </structure>
+                <structure>
+                    <property name="value">0</property>
+                    <property name="label">签入/签出</property>
+                </structure>
+                <structure>
+                    <property name="value">1</property>
+                    <property name="label">被闭塞/解闭塞</property>
+                </structure>
+                <structure>
+                    <property name="value">2</property>
+                    <property name="label">示忙/示闲</property>
+                </structure>
+                <structure>
+                    <property name="value">10</property>
+                    <property name="label">进入/退出呼入模式</property>
+                </structure>
+                <structure>
+                    <property name="value">11</property>
+                    <property name="label">进入/退出呼出模式</property>
+                </structure>
+                <structure>
+                    <property name="value">12</property>
+                    <property name="label">进入/退出智能模式</property>
+                </structure>
+            </list-property>
+        </scalar-parameter>
+        <cascading-parameter-group name="企业-组-座席" id="1077">
+            <property name="dataSet">entset</property>
+            <parameters>
+                <scalar-parameter name="entid" id="1071">
+                    <property name="valueType">dynamic</property>
+                    <property name="promptText">企业</property>
+                    <property name="allowNull">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">list-box</property>
+                    <expression name="valueExpr">row["ENTID"]</expression>
+                    <expression name="labelExpr">row["ENTNAME"]</expression>
+                    <property name="defaultValue">0</property>
+                </scalar-parameter>
+                <scalar-parameter name="groupid" id="1078">
+                    <property name="valueType">dynamic</property>
+                    <property name="promptText">坐席组</property>
+                    <property name="allowNull">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">list-box</property>
+                    <expression name="valueExpr">row["GROUPID"]</expression>
+                    <expression name="labelExpr">row["GROUPNAME"]</expression>
+                    <property name="defaultValue">0</property>
+                </scalar-parameter>
+                <scalar-parameter name="agentid" id="1079">
+                    <property name="valueType">dynamic</property>
+                    <property name="promptText">坐席</property>
+                    <property name="allowNull">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">list-box</property>
+                    <expression name="valueExpr">row["AGENTID"]</expression>
+                    <expression name="labelExpr">row["AGENTNAME"]</expression>
+                    <property name="defaultValue">0</property>
+                </scalar-parameter>
+            </parameters>
+        </cascading-parameter-group>
+    </parameters>
+    <data-sources>
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="ora" id="4">
+            <property name="odaDriverClass">oracle.jdbc.driver.OracleDriver</property>
+            <property name="odaURL">jdbc:oracle:thin:@172.16.53.169:1521:orcl</property>
+            <property name="odaUser">petra</property>
+            <encrypted-property name="odaPassword">c3VudGVr</encrypted-property>
+        </oda-data-source>
+    </data-sources>
+    <data-sets>
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.SPSelectDataSet" name="dataset" id="702">
+            <property name="dataSource">ora</property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">begindate</property>
+                    <property name="dataType">string</property>
+                    <property name="position">1</property>
+                    <expression name="defaultValue">'2007-07-01'</expression>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">enddate</property>
+                    <property name="dataType">string</property>
+                    <property name="position">2</property>
+                    <expression name="defaultValue">'2007-07-02'</expression>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">begintime</property>
+                    <property name="dataType">string</property>
+                    <property name="position">3</property>
+                    <expression name="defaultValue">'00:00:000'</expression>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">endtime</property>
+                    <property name="dataType">string</property>
+                    <property name="position">4</property>
+                    <expression name="defaultValue">'23:59:59'</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">framecode</property>
+                    <property name="dataType">string</property>
+                    <property name="position">5</property>
+                    <expression name="defaultValue">'0'</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">groupid</property>
+                    <property name="dataType">integer</property>
+                    <property name="position">6</property>
+                    <expression name="defaultValue">0</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">agentid</property>
+                    <property name="dataType">string</property>
+                    <property name="position">7</property>
+                    <expression name="defaultValue">'0'</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">operationtype</property>
+                    <property name="dataType">string</property>
+                    <property name="position">8</property>
+                    <expression name="defaultValue">'0'</expression>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">infocursor</property>
+                    <property name="dataType">any</property>
+                    <property name="position">9</property>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">false</property>
+                    <property name="isOutput">true</property>
+                </structure>
+            </list-property>
+            <property name="queryText">{call RPT_AGENT_OPERATION(?,?,?,?,?,?,?,?,?)} </property>
+        </oda-data-set>
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="entset" id="1120">
+            <property name="dataSource">ora</property>
+            <property name="queryText">select ENTID,ENTNAME,GROUPID,GROUPNAME,AGENTID,AGENTNAME
+from report_groupagent
+where 
+ '__USERCODE' = 'admin'
+ or '__USERCODE' = 'report'
+ or ('__USERCODE' in (select AGENTID from view_reportgroup))
+ or (ENTID in (select distinct fram_code from report_agent where user_code='__USERCODE'))
+order by ENTID,GROUPID,AGENTID</property>
+        </oda-data-set>
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="entname" id="1121">
+            <property name="dataSource">ora</property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">entid</property>
+                    <property name="dataType">string</property>
+                    <property name="position">1</property>
+                    <expression name="defaultValue">'0'</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">groupid</property>
+                    <property name="dataType">integer</property>
+                    <property name="position">2</property>
+                    <expression name="defaultValue">0</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">agentid</property>
+                    <property name="dataType">string</property>
+                    <property name="position">3</property>
+                    <expression name="defaultValue">'0'</expression>
+                    <property name="isInput">true</property>
+                </structure>
+            </list-property>
+            <property name="queryText">select nvl(ENTNAME,'') ENTNAME,
+nvl(GROUPNAME,'') GROUPNAME,
+nvl(AGENTNAME,'') AGENTNAME
+from report_groupagent 
+where ENTID=?
+and GROUPID=?
+and AGENTID=?</property>
+        </oda-data-set>
+    </data-sets>
+    <styles>
+        <style name="字段名" id="141">
+            <property name="backgroundColor">#D1DEF0</property>
+            <property name="fontFamily">宋体</property>
+            <property name="fontSize">12px</property>
+            <property name="fontWeight">normal</property>
+            <property name="borderBottomColor">#808080</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">0.2pt</property>
+            <property name="borderLeftColor">#808080</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">0.2pt</property>
+            <property name="borderRightColor">#808080</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">0.2pt</property>
+            <property name="borderTopColor">#808080</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">0.2pt</property>
+            <property name="textIndent">0em</property>
+            <property name="verticalAlign">middle</property>
+        </style>
+        <style name="head" id="286">
+            <property name="fontFamily">宋体</property>
+            <property name="fontSize">12px</property>
+            <property name="borderBottomColor">#0000FF</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">0.2pt</property>
+            <property name="borderLeftColor">#0000FF</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">0.2pt</property>
+            <property name="borderRightColor">#0000FF</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">0.2pt</property>
+            <property name="borderTopColor">#0000FF</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">0.2pt</property>
+            <property name="textIndent">0em</property>
+            <property name="whiteSpace">normal</property>
+        </style>
+        <style name="数据" id="287">
+            <property name="fontFamily">宋体</property>
+            <property name="fontSize">12px</property>
+            <property name="borderBottomColor">#808080</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">0.2pt</property>
+            <property name="borderLeftColor">#808080</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">0.2pt</property>
+            <property name="borderRightColor">#808080</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">0.2pt</property>
+            <property name="borderTopColor">#808080</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">0.2pt</property>
+        </style>
+        <style name="sum" id="227">
+            <property name="backgroundColor">#FFCC99</property>
+            <property name="fontFamily">宋体</property>
+            <property name="fontSize">13px</property>
+            <property name="borderBottomColor">#808080</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">0.2pt</property>
+            <property name="borderLeftColor">#808080</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">0.2pt</property>
+            <property name="borderRightColor">#808080</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">0.2pt</property>
+            <property name="borderTopColor">#808080</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">0.2pt</property>
+        </style>
+        <style name="标题" id="239">
+            <property name="backgroundColor">#D1DEF0</property>
+            <property name="fontFamily">宋体</property>
+            <property name="fontSize">large</property>
+            <property name="textUnderline">underline</property>
+            <property name="borderBottomColor">#808080</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">0.2pt</property>
+            <property name="borderLeftColor">#808080</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">0.2pt</property>
+            <property name="borderRightColor">#808080</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">0.2pt</property>
+            <property name="borderTopColor">#808080</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">0.2pt</property>
+        </style>
+    </styles>
+    <page-setup>
+        <simple-master-page name="Simple MasterPage" id="2">
+            <property name="leftMargin">1.005cm</property>
+            <property name="rightMargin">1.084cm</property>
+        </simple-master-page>
+    </page-setup>
+    <body>
+        <table id="454">
+            <property name="marginTop">5pt</property>
+            <property name="marginLeft">5pt</property>
+            <property name="marginBottom">5pt</property>
+            <property name="marginRight">5pt</property>
+            <property name="width">100%</property>
+            <property name="dataSet">dataset</property>
+            <list-property name="paramBindings">
+                <structure>
+                    <property name="paramName">begindate</property>
+                    <expression name="expression">params["begindate"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">enddate</property>
+                    <expression name="expression">params["enddate"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">begintime</property>
+                    <expression name="expression">params["begintime"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">operationtype</property>
+                    <expression name="expression">params["operation"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">endtime</property>
+                    <expression name="expression">params["endtime"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">framecode</property>
+                    <expression name="expression">params["entid"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">groupid</property>
+                    <expression name="expression">params["groupid"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">agentid</property>
+                    <expression name="expression">params["agentid"]</expression>
+                </structure>
+            </list-property>
+            <column id="467">
+                <property name="width">3cm</property>
+            </column>
+            <column id="468">
+                <property name="width">3cm</property>
+            </column>
+            <column id="469">
+                <property name="width">3cm</property>
+            </column>
+            <column id="1128">
+                <property name="width">3cm</property>
+            </column>
+            <column id="1142">
+                <property name="width">3cm</property>
+            </column>
+            <column id="517">
+                <property name="width">3cm</property>
+            </column>
+            <header>
+                <row id="690">
+                    <property name="height">1.5cm</property>
+                    <cell id="691">
+                        <property name="colSpan">6</property>
+                        <property name="rowSpan">1</property>
+                        <property name="style">标题</property>
+                        <property name="verticalAlign">middle</property>
+                        <text id="163">
+                            <property name="fontSize">14pt</property>
+                            <property name="fontWeight">bold</property>
+                            <property name="textUnderline">underline</property>
+                            <property name="textAlign">center</property>
+                            <property name="contentType">plain</property>
+                            <text-property name="content"><![CDATA[话务员操作记录]]></text-property>
+                        </text>
+                    </cell>
+                </row>
+                <row id="678">
+                    <cell id="679">
+                        <property name="colSpan">6</property>
+                        <property name="rowSpan">1</property>
+                        <property name="style">数据</property>
+                        <property name="paddingLeft">2pt</property>
+                        <property name="paddingRight">2pt</property>
+                        <data id="749">
+                            <property name="fontSize">14px</property>
+                            <property name="dataSet">entname</property>
+                            <list-property name="paramBindings">
+                                <structure>
+                                    <property name="paramName">entid</property>
+                                    <expression name="expression">params["entid"]</expression>
+                                </structure>
+                                <structure>
+                                    <property name="paramName">groupid</property>
+                                    <expression name="expression">params["groupid"]</expression>
+                                </structure>
+                                <structure>
+                                    <property name="paramName">agentid</property>
+                                    <expression name="expression">params["agentid"]</expression>
+                                </structure>
+                            </list-property>
+                            <expression name="valueExpr">'企业：'+row["ENTNAME"]+'    '+'组：'+row["GROUPNAME"]+'    '+'座席：'+row["AGENTNAME"]</expression>
+                        </data>
+                    </cell>
+                </row>
+                <row id="1090">
+                    <cell id="1091">
+                        <property name="colSpan">6</property>
+                        <property name="rowSpan">1</property>
+                        <property name="style">数据</property>
+                        <property name="paddingLeft">2pt</property>
+                        <property name="paddingRight">2pt</property>
+                        <data id="684">
+                            <expression name="valueExpr">'统计时段：从'+params["begindate"]+'至'+params["enddate"]</expression>
+                        </data>
+                    </cell>
+                </row>
+                <row id="455">
+                    <cell id="456">
+                        <property name="style">字段名</property>
+                        <property name="fontFamily">serif</property>
+                        <property name="textAlign">center</property>
+                        <label id="574">
+                            <text-property name="text">座席工号</text-property>
+                        </label>
+                    </cell>
+                    <cell id="457">
+                        <property name="style">字段名</property>
+                        <property name="fontFamily">serif</property>
+                        <property name="textAlign">center</property>
+                        <label id="575">
+                            <text-property name="text">座席姓名</text-property>
+                        </label>
+                    </cell>
+                    <cell id="458">
+                        <property name="style">字段名</property>
+                        <property name="fontFamily">serif</property>
+                        <property name="textAlign">center</property>
+                        <label id="577">
+                            <text-property name="text">操作时间</text-property>
+                        </label>
+                    </cell>
+                    <cell id="1125">
+                        <property name="style">字段名</property>
+                        <property name="fontFamily">serif</property>
+                        <property name="textAlign">center</property>
+                        <label id="1144">
+                            <text-property name="text">持续时间</text-property>
+                        </label>
+                    </cell>
+                    <cell id="1139">
+                        <property name="style">字段名</property>
+                        <property name="fontFamily">serif</property>
+                        <property name="textAlign">center</property>
+                        <label id="1145">
+                            <text-property name="text">操作类型</text-property>
+                        </label>
+                    </cell>
+                    <cell id="515">
+                        <property name="style">字段名</property>
+                        <property name="fontFamily">serif</property>
+                        <property name="textAlign">center</property>
+                        <label id="579">
+                            <text-property name="text">外呼空闲时间</text-property>
+                        </label>
+                    </cell>
+                </row>
+            </header>
+            <detail>
+                <row id="459">
+                    <property name="textAlign">center</property>
+                    <cell id="460">
+                        <property name="style">数据</property>
+                        <property name="textAlign">center</property>
+                        <data id="672">
+                            <expression name="valueExpr">row["AGENTID"]</expression>
+                        </data>
+                    </cell>
+                    <cell id="461">
+                        <property name="style">数据</property>
+                        <property name="textAlign">center</property>
+                        <data id="669">
+                            <expression name="valueExpr">row["AGENTNAME"]</expression>
+                        </data>
+                    </cell>
+                    <cell id="462">
+                        <property name="style">数据</property>
+                        <property name="textAlign">center</property>
+                        <data id="1154">
+                            <expression name="valueExpr">row["OPTIME"]</expression>
+                        </data>
+                    </cell>
+                    <cell id="1126">
+                        <property name="style">数据</property>
+                        <property name="textAlign">center</property>
+                        <data id="1155">
+                            <expression name="valueExpr">row["DURATION"]</expression>
+                        </data>
+                    </cell>
+                    <cell id="1140">
+                        <property name="style">数据</property>
+                        <property name="textAlign">center</property>
+                        <data id="1152">
+                            <expression name="valueExpr">row["OPERTION"]</expression>
+                        </data>
+                    </cell>
+                    <cell id="516">
+                        <property name="style">数据</property>
+                        <property name="textAlign">center</property>
+                        <data id="1150">
+                            <expression name="valueExpr">row["RESERVE"]</expression>
+                        </data>
+                    </cell>
+                </row>
+            </detail>
+            <footer>
+                <row id="673">
+                    <cell id="674">
+                        <property name="colSpan">6</property>
+                        <property name="rowSpan">1</property>
+                        <property name="style">数据</property>
+                        <property name="paddingLeft">2pt</property>
+                        <property name="paddingRight">2pt</property>
+                    </cell>
+                </row>
+            </footer>
+        </table>
+    </body>
+</report>

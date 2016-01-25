@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_recording_check_task" extends="interceptors" namespace="/">
+		<default-interceptor-ref name="stack_check_user"></default-interceptor-ref>
+		<action name="initRecordingCheck" class="com.helphand.ccdms.actions.manage_recording_check" method="init_recording_check">
+			<result>/pages/manage_recording_check.html</result>
+		</action>
+		<action name="initRecordingCheckJiangxi" class="com.helphand.ccdms.actions.manage_recording_check" method="init_recording_check">
+			<result>/pages/manage_recording_check_jiangxi.html</result>
+		</action> 
+		<action name="listRecordingCheckResult" class="com.helphand.ccdms.actions.manage_recording_check" method="list_recording_check_result">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action> 
+		<action name="infoCommonsRecordsList" class="com.helphand.ccdms.actions.manage_recording_check" method="info_commons_records_list">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action> 
+		<action name="saveRecordingCheckResult" class="com.helphand.ccdms.actions.manage_recording_check" method="save_recording_check_result">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action> 
+		<action name="delRecordingCheckResult" class="com.helphand.ccdms.actions.manage_recording_check" method="del_recording_check_result">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action> 
+		<action name="infoRecordingCheckResult" class="com.helphand.ccdms.actions.manage_recording_check" method="info_recording_check_result">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action> 
+		<action name="listCheckAdminUser" class="com.helphand.ccdms.actions.manage_recording_check" method="list_check_admin_user">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action> 
+		<action name="execRecheckResult" class="com.helphand.ccdms.actions.manage_recording_check" method="exec_recheck_result">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action> 
+		<action name="modifyCheckStatus" class="com.helphand.ccdms.actions.manage_recording_check" method="modify_check_status">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action> 
+		<action name="checkAndRecheck" class="com.helphand.ccdms.actions.manage_recording_check" method="check_and_recheck">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="downloadCheckResult" class="com.helphand.ccdms.actions.manage_recording_check" method="download_check_result">
+		</action>
+	</package>
+</struts>

@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript">
+	var viewport_main;
+	var toolbar_search;
+	var grid_report;
+	
+	var result_model="";
+	var store_report_column_data;
+	
+	//初始化
+	Ext.onReady(function() {
+				
+		init_search();
+		grid_report = Ext.create('Ext.grid.Panel', {
+			tbar : toolbar_search,
+		    columns : [],
+		});
+		
+		viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_report ],
+			renderTo : Ext.getBody(),
+		});
+		
+	});
+	//搜索栏
+	function init_search() {
+		Ext.define('model_script_options', {
+			extend : 'Ext.data.Model',
+			fields : [{
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'describe',
+				type : 'string',
+			}],
+		});
+		
+		toolbar_search=Ext.create('Ext.toolbar.Toolbar',{
+			items:[
+			    '工号:', {
+			    	xtype : 'field',
+			    	id : 'input_agent_id',
+			    	width : 60,
+			    },'日期:', {
+			    	xtype : 'datefield',
+			    	id: 'input_start_date',
+			    	format : 'Y-m-d',
+			    	flex : 1,
+			    }, '至', {
+			    	xtype : 'datefield',
+			    	id: 'input_end_date',
+			    	format : 'Y-m-d',
+			    	flex : 1,
+			    }, {
+			    	text:'搜索',
+			    	handler:function(){
+						search();
+					}
+			    }
+			],
+		});
+	}
+	//动态生成页面
+	function search(){
+		Ext.Ajax.request({
+			url : '/ccdms/countReportColumnAgent.do',
+			params : {
+				'agent_id' : Ext.getCmp('input_agent_id').getValue(),
+			},
+			success : function(response) {
+				result_model = response.responseText;
+				show_body();
+			},
+		});
+	}
+	//显示页面
+	function show_body() {
+		Ext.define('model_report_column', {
+			extend : 'Ext.data.Model',
+			fields : Ext.decode(result_model).modelBeanList,
+		});
+		
+		var agent_id = Ext.getCmp('input_agent_id').getValue();
+		var start_date = Ext.getCmp('input_start_date').getValue();
+		var end_date = Ext.getCmp('input_end_date').getValue();
+		start_date = Ext.util.Format.date(start_date, 'Y-m-d');
+		end_date = Ext.util.Format.date(end_date, 'Y-m-d');
+		
+		store_report_column_data = Ext.create('Ext.data.Store', {
+			pageSize : 20,
+			model : model_report_column,
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/countReportDataAgent.do',
+				actionMethods: {
+			        read : 'post'
+			    },
+			    extraParams : {
+			    	'agent_id'      : agent_id,
+			    	'start_date'    : start_date,
+			    	'end_date'      : end_date,
+			    },
+				reader : {
+					type : 'json',
+					root : 'rows',
+					totalProperty : 'total'
+				}
+			}
+		});
+		
+		//主界面
+		grid_report = Ext.create('Ext.grid.Panel', {
+			tbar : toolbar_search,
+			stripeRows : true,
+			store : store_report_column_data,
+			columnLines : true,
+			loadMask : true,
+			columns : Ext.decode(result_model).columnBeanList,
+			bbar : Ext.create('Ext.toolbar.Paging', {
+				store : store_report_column_data,
+				displayInfo : true,
+			}),
+		});
+		//入口
+		viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_report ],
+			renderTo : Ext.getBody(),
+		});
+	}
+</script>
+</head>
+<body></body>
+</html>

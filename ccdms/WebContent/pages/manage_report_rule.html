@@ -1,0 +1,426 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/ccdms/js/timeout.js"></script>
+<script type="text/javascript">
+	var report_rule_store;
+	var report_rule_item_store;
+	var window_report_rule;
+	var window_report_rule_item;
+	
+	Ext.onReady(function () {
+		Ext.define('model_report_rule', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'rule_name',
+				type : 'string',
+			}, {
+				name : 'rule_remark',
+				type : 'string',
+			} ]
+		});
+		//--
+		report_rule_store = Ext.create('Ext.data.Store', {
+			model : 'model_report_rule',
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/listReportRule.do',
+				reader : {
+					type : 'json',
+					root : 'rows',
+					totalProperty : 'total'
+				}
+			}
+		});
+		//--
+		var report_rule_panel = Ext.create('Ext.grid.Panel', {
+			title: '报表模板',
+		    store: report_rule_store,
+		    columns : [ {
+		    	text : '标识', 
+		    	dataIndex : 'id',
+		    	flex : 1,
+		    }, {
+		    	text : '报表模板', 
+		    	dataIndex : 'rule_name',
+		    	flex : 1,
+		    }, {
+		    	text : '备注', 
+		    	dataIndex : 'rule_remark',
+		    	flex : 1,
+		    }, {
+		    	text : '操作',
+		    	align : 'right',
+		    	flex : 1,
+		    	renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var result = "<a href='#' onclick=open_report_rule_item_window("+ record.data["id"] +",'"+ record.data["rule_name"] +"')>添加规则</a>&nbsp;&nbsp;";
+					result += "<a href='#' onclick=exec_del_report_rule("+ record.data["id"] +",'"+ record.data["rule_name"] +"')>删除</a>&nbsp;&nbsp;";
+					return result;
+				}
+		    } ],
+		    plugins: [{
+		        ptype: 'rowexpander',
+		        rowBodyTpl: [ '<div id="{rule_name}"></div>' ]
+		    }],
+		    bbar : Ext.create('Ext.toolbar.Paging', {
+				store : report_rule_store,
+				displayInfo : true,
+			}),
+			tools : [ {
+				type : 'plus',
+				handler : function() {
+					open_report_rule_window();
+				}
+			}],
+		});
+	    
+		//
+	    report_rule_panel.view.on('expandBody', function (rowNode, record, expandRow, eOpts) {
+	        display_report_rule_item(record.get('rule_name'));
+	        report_rule_item_store.on('beforeload', function() {
+				Ext.apply(report_rule_item_store.proxy.extraParams, {
+					'rule_item.rule_id' : record.get('id'),
+				});
+			});
+	    	report_rule_item_store.reload();
+	    });
+	    //
+	    report_rule_panel.view.on('collapsebody', function (rowNode, record, expandRow, eOpts) {
+	        destroy_report_rule_item(record);
+	    });
+	    //
+	    report_rule_panel.render(Ext.getBody());
+	    report_rule_panel.setHeight(window.innerHeight);
+	    report_rule_panel.setWidth(window.innerWidth);
+	    
+	    var viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ report_rule_panel ],
+		});
+	});
+	
+	//--
+	function display_report_rule_item(renderId) {
+		Ext.define('model_report_rule_item', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'rule_id',
+				type : 'int',
+			}, {
+				name : 'rule_title',
+				type : 'string',
+			}, {
+				name : 'rule_field',
+				type : 'string',
+			}, {
+				name : 'rule_order',
+				type : 'int',
+			} ]
+		});
+		//--
+		report_rule_item_store = Ext.create('Ext.data.Store', {
+			model : 'model_report_rule_item',
+			autoLoad : false,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/listReportRuleItem.do',
+				reader : {
+					type : 'json',
+					root : 'rows',
+				}
+			}
+		});
+		//--
+	    var report_rule_item_panel = Ext.create('Ext.grid.Panel', {
+	        store: report_rule_item_store,
+	        columns: [{
+	        	text : '标识', 
+		    	dataIndex : 'id',
+		    	flex : 1,
+			}, {
+				text : '模板编号', 
+		    	dataIndex : 'rule_id',
+		    	flex : 1,
+			}, {
+				text : '表头名', 
+		    	dataIndex : 'rule_title',
+		    	flex : 1,
+			}, {
+				text : '关联字段', 
+		    	dataIndex : 'rule_field',
+		    	flex : 1,
+			}, {
+				text : '顺序', 
+		    	dataIndex : 'rule_order',
+		    	flex : 1,
+			}, {
+				text : '操作',
+				flex : 1,
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var result = "<a href='#' onclick=open_report_rule_item_window("+ record.data["rule_id"] +",'',"
+						+ record.data["id"] +",'"+ record.data["rule_title"] +"','"
+						+ record.data["rule_field"] +"',"+ record.data["rule_order"] +")>修改</a>&nbsp;&nbsp;";
+					result += "<a href='#' onclick=exec_del_report_rule_item("+ record.data["id"] +",'"+ record.data["rule_title"] +"')>删除</a>&nbsp;&nbsp;";
+					return result;
+				}
+			}],
+	        renderTo: renderId,
+	    });
+		//--
+	    report_rule_item_panel.getEl().swallowEvent([
+	        'mousedown', 'mouseup', 'click',
+	        'contextmenu', 'mouseover', 'mouseout',
+	        'dblclick', 'mousemove'
+	    ]);
+	}
+	//--
+	function destroy_report_rule_item(record) {
+	    var parent = document.getElementById(record.get('rule_name'));
+	    var child = parent.firstChild;
+	    while (child) {
+	        child.parentNode.removeChild(child);
+	        child = child.nextSibling;
+	    }
+	}
+	
+	//模板信息
+	function open_report_rule_window() {
+		window_report_rule = Ext.create('Ext.window.Window', {
+			title : '报表模板信息',
+			width : 300,
+			height : 150,
+			layout : 'form',
+			bodyPadding : 10,
+			buttonAlign : "center",
+			items : [ {
+				xtype : 'textfield',
+				id : 'input_rule_name',
+				fieldLabel : '模板名称',
+			}, {
+				xtype : 'textfield',
+				id : 'input_rule_remark',
+				fieldLabel : '备注',
+			} ],
+			buttons : [{
+				text : "提交",
+				handler : function() {
+					ajax_report_rule_info();
+				}
+			}],
+		}).show();
+	}
+	//保存模板信息
+	function ajax_report_rule_info(id) {
+		if(id == null) id = 0;
+		
+		Ext.Ajax.request({
+			url : '/ccdms/saveReportRule.do',
+			params : {
+				'rule.id' : id,
+				'rule.rule_name' : Ext.getCmp('input_rule_name').value,
+				'rule.rule_remark' : Ext.getCmp('input_rule_remark').value,
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					report_rule_store.reload();
+					window_report_rule.close();
+					Ext.Msg.show({
+						title : '消息',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.INFO
+					});
+				}else {
+					Ext.Msg.show({
+						title : '错误',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.ERROR
+					});
+				}
+			}
+		});
+	}
+	//删除模板
+	function exec_del_report_rule(id, title) {
+		var question = "是否确定删除：["+ title +"]";
+		Ext.Msg.show({
+			title : '消息',
+			msg : question,
+			buttons : Ext.Msg.YESNO,
+			icon : Ext.Msg.QUESTION,
+			fn : function(result) {
+				if(result == "yes") {
+					ajax_del_report_rule(id);
+				}
+			}
+		});
+	}
+	//执行删除模板
+	function ajax_del_report_rule(id) {
+		Ext.Ajax.request({
+			url : '/ccdms/delReportRule.do',
+			params : {
+				'rule.id' : id,
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					report_rule_store.reload();
+					Ext.Msg.show({
+						title : '消息',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.INFO
+					});
+				}else {
+					Ext.Msg.show({
+						title : '错误',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.ERROR
+					});
+				}
+			}
+		});
+	}
+	
+	//模板规则信息
+	function open_report_rule_item_window(rule_id, rule_name, id, rule_tilte,rule_field,rule_order) {
+		if(rule_tilte == null) rule_tilte = "";
+		if(rule_field == null) rule_tilte = "";
+		
+		window_report_rule_item = Ext.create('Ext.window.Window', {
+			title : rule_name,
+			width : 300,
+			height : 200,
+			layout : 'form',
+			bodyPadding : 10,
+			buttonAlign : "center",
+			items : [ {
+				xtype : 'textfield',
+				id : 'input_rule_id',
+				fieldLabel : '模板编号',
+				value : rule_id,
+				readOnly : true,
+			}, {
+				xtype : 'textfield',
+				id : 'input_rule_title',
+				fieldLabel : '表头名',
+				value : rule_tilte,
+			}, {
+				xtype : 'textfield',
+				id : 'input_rule_field',
+				fieldLabel : '关联字段',
+				value : rule_field,
+			}, {
+				xtype : 'textfield',
+				id : 'input_rule_order',
+				fieldLabel : '顺序',
+				value : rule_order,
+			} ],
+			buttons : [{
+				text : "提交",
+				handler : function() {
+					ajax_report_rule_item_info(id);
+				}
+			}],
+		}).show();
+	}
+	//保存规则信息
+	function ajax_report_rule_item_info(id) {
+		if(id == null) id = 0;
+		
+		Ext.Ajax.request({
+			url : '/ccdms/saveReportRuleItem.do',
+			params : {
+				'rule_item.id' : id,
+				'rule_item.rule_id' : Ext.getCmp('input_rule_id').value,
+				'rule_item.rule_title' : Ext.getCmp('input_rule_title').value,
+				'rule_item.rule_field' : Ext.getCmp('input_rule_field').value,
+				'rule_item.rule_order' : Ext.getCmp('input_rule_order').value,
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					report_rule_item_store.reload();
+					window_report_rule_item.close();
+					Ext.Msg.show({
+						title : '消息',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.INFO
+					});
+				}else {
+					Ext.Msg.show({
+						title : '错误',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.ERROR
+					});
+				}
+			}
+		});
+	}
+	
+	//删除规则
+	function exec_del_report_rule_item(id, title) {
+		var question = "是否确定删除：["+ title +"]";
+		Ext.Msg.show({
+			title : '消息',
+			msg : question,
+			buttons : Ext.Msg.YESNO,
+			icon : Ext.Msg.QUESTION,
+			fn : function(result) {
+				if(result == "yes") {
+					ajax_del_report_rule_item(id);
+				}
+			}
+		});
+	}
+	//执行删除规则
+	function ajax_del_report_rule_item(id) {
+		Ext.Ajax.request({
+			url : '/ccdms/delReportRuleItem.do',
+			params : {
+				'rule_item.id' : id,
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					report_rule_item_store.reload();
+					Ext.Msg.show({
+						title : '消息',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.INFO
+					});
+				}else {
+					Ext.Msg.show({
+						title : '错误',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.ERROR
+					});
+				}
+			}
+		});
+	}
+</script>
+</head>
+<body>
+</body>
+</html>

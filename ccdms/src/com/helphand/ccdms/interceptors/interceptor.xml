@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="interceptors" extends="json-default" abstract="true">
+		<interceptors>
+			<interceptor name="user_login" class="com.helphand.ccdms.interceptors.check_user_login" />
+			<interceptor name="user_authority" class="com.helphand.ccdms.interceptors.check_user_authority" />
+			<interceptor-stack name="stack_check_user">
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+				<interceptor-ref name="user_login"></interceptor-ref>
+				<interceptor-ref name="user_authority"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<global-results>
+			<result name="user_not_login">/pages/frame_login.html</result>
+			<result name="user_not_authority">/pages/user_not_authority.html</result>
+		</global-results>
+	</package>
+</struts>

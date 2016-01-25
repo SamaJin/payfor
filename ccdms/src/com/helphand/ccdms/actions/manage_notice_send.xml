@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_notice_send" extends="interceptors" namespace="/">
+		<default-interceptor-ref name="stack_check_user"></default-interceptor-ref>
+		<action name="initNoticeMessage" class="com.helphand.ccdms.actions.manage_notice_send" method="init_notice_message">
+			<result>/pages/manage_notice_send.html</result>
+		</action>
+		<action name="initListNoticeMessage" class="com.helphand.ccdms.actions.manage_notice_send" method="init_list_notice_message">
+			<result>/pages/manage_notice_send.html</result>
+		</action>
+		<action name="listNoticeMessage" class="com.helphand.ccdms.actions.manage_notice_send" method="list_notice_message">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="addNoticeMessage" class="com.helphand.ccdms.actions.manage_notice_send" method="add_notice_message">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="deleteNoticeMessage" class="com.helphand.ccdms.actions.manage_notice_send" method="delete_notice_message">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="initModifyNoticeMessage" class="com.helphand.ccdms.actions.manage_notice_send" method="init_modify_notice_message">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="modifyNoticeMessage" class="com.helphand.ccdms.actions.manage_notice_send" method="modify_notice_message">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+	</package>
+</struts>

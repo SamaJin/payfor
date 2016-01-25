@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_admin_module" extends="interceptors" namespace="/">
+		<default-interceptor-ref name="stack_check_user"></default-interceptor-ref>
+		<action name="initListAdminModule" class="com.helphand.ccdms.actions.manage_admin_module" method="init_list_admin_module">
+			<result>/pages/manage_admin_module.html</result>
+		</action>
+		<action name="listAdminModule" class="com.helphand.ccdms.actions.manage_admin_module" method="list_admin_module">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="listModuleGroupName" class="com.helphand.ccdms.actions.manage_admin_module" method="list_module_group_name">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="listAdminModuleName" class="com.helphand.ccdms.actions.manage_admin_module" method="list_admin_module_name">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="infoAdminModule" class="com.helphand.ccdms.actions.manage_admin_module" method="info_admin_module">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="saveAdminModule" class="com.helphand.ccdms.actions.manage_admin_module" method="save_admin_module">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="deleteAdminModule" class="com.helphand.ccdms.actions.manage_admin_module" method="delete_admin_module">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+	</package>
+</struts>

@@ -1,0 +1,410 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/ccdms/js/timeout.js"></script>
+<script type="text/javascript">
+	var viewport_main;
+	var grid_admin_user;
+	var store_grid_admin_user;
+	var store_admin_user_type;
+	var store_admin_user_status;
+	var window_add_admin_user;
+	var window_modify_admin_user;
+	var window_search_admin_user;
+	var window_manager_admin_user_authority;
+	var store_module_group_name;
+	//--
+	Ext.define('model_admin_user', {
+		extend : 'Ext.data.Model',
+		fields : [ {
+			name : 'id',
+			type : 'int'
+		}, {
+			name : 'admin_user_name',
+			type : 'string'
+		}, {
+			name : 'admin_user_password',
+			type : 'string'
+		}, {
+			name : 'admin_user_type',
+			type : 'string'
+		}, {
+			name : 'admin_user_status',
+			type : 'string'
+		}, {
+			name : 'admin_user_remarks',
+			type : 'string',
+		} ]
+	});
+	Ext.define('model_admin_module_group', {
+		extend : 'Ext.data.Model',
+		fields : [ {
+			name : 'id',
+			type : 'int',
+		}, {
+			name : 'module_group_name',
+			type : 'string',
+		}, {
+			name : 'module_group_describe',
+			type : 'string',
+		}, {
+			name : 'module_status',
+			type : 'int',
+		} ]
+	});
+	//--
+	store_admin_user_type = Ext.create('Ext.data.Store', {
+		fields : [ 'abbr', 'name' ],
+		data : [ {
+			"abbr" : "超级管理员",
+			"name" : "超级管理员"
+		}, {
+			"abbr" : "普通管理员",
+			"name" : "普通管理员"
+		} ]
+	});
+	//--
+	store_admin_user_status = Ext.create('Ext.data.Store', {
+		fields : [ 'abbr', 'name' ],
+		data : [ {
+			"abbr" : "禁用",
+			"name" : "禁用"
+		}, {
+			"abbr" : "可用",
+			"name" : "可用"
+		} ]
+	});
+	//--
+	store_grid_admin_user = Ext.create('Ext.data.Store', {
+		model : 'model_admin_user',
+		autoLoad : false,
+		proxy : {
+			type : 'ajax',
+			url : '/ccdms/listAdminUser.do',
+			reader : {
+				type : 'json',
+				root : 'rows',
+				totalProperty : 'total'
+			}
+		}
+	});
+	//--
+	Ext.onReady(function() {
+		grid_admin_user = Ext.create('Ext.grid.Panel', {
+			title : '系统用户管理',
+			store : store_grid_admin_user,
+			columnLines : true,
+			rowLines : true,
+			loadMask : true,
+			columns : [ {
+				text : '用户',
+				dataIndex : 'admin_user_name',
+			}, {
+				text : '密码',
+				dataIndex : 'admin_user_password',
+			}, {
+				text : '类别',
+				dataIndex : 'admin_user_type',
+			}, {
+				text : '状态',
+				dataIndex : 'admin_user_status',
+			}, {
+				text : '备注',
+				dataIndex : 'admin_user_remarks',
+			}, {
+				text : '操作',
+				sortable : false,
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = '';
+					str += '<a href="#" onClick="open_manage_task_user_window(' + record.data["id"] + ')">权限</a>&nbsp;&nbsp;';
+					str += '<a href="#" onClick="action_open_modify_admin_user(' + record.data["id"] + ')">修改</a>&nbsp;&nbsp;';
+					str += '<a href="#" onClick="action_delete_admin_user( ' + record.data["id"] + ' )">删除</a>';
+					return str;
+				}
+			} ],
+			bbar : Ext.create('Ext.toolbar.Paging', {
+				store : store_grid_admin_user,
+				displayInfo : true
+			}),
+			tools : [ {
+				type : 'plus',
+				handler : function() {
+					action_open_add_admin_user_window();
+				}
+			}, {
+				type : 'search',
+				handler : function() {
+
+				}
+			} ],
+		});
+		store_grid_admin_user.load();
+		grid_admin_user.show();
+		//--
+		viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_admin_user ],
+		});
+	});
+	//--添加用户窗口
+	function action_open_add_admin_user_window() {
+		window_add_admin_user = Ext.create('Ext.window.Window', {
+			title : '添加用户',
+			width : 400,
+			layout : 'form',
+			modal : true,
+			buttonAlign : 'center',
+			bodyPadding : 10,
+			items : [ {
+				xtype : 'textfield',
+				id : 'input_add_admin_user_name',
+				fieldLabel : '用户',
+				allowBlank : false
+			}, {
+				xtype : 'textfield',
+				id : 'input_add_admin_user_password',
+				fieldLabel : '密码',
+				allowBlank : false
+			}, {
+				xtype : 'combo',
+				id : 'input_add_admin_user_type',
+				fieldLabel : '类型',
+				allowBlank : false,
+				editable : false,
+				store : store_admin_user_type,
+				queryMode : 'local',
+				displayField : 'name',
+				valueField : 'abbr',
+			} ],
+			buttons : [ {
+				text : '添加',
+				handler : function() {
+					Ext.Ajax.request({
+						url : '/ccdms/addAdminUser.do',
+						params : {
+							admin_user_name : Ext.getCmp('input_add_admin_user_name').getValue(),
+							admin_user_password : Ext.getCmp('input_add_admin_user_password').getValue(),
+							admin_user_type : Ext.getCmp('input_add_admin_user_type').getValue()
+						},
+						success : function(resp, opts) {
+							var result = Ext.decode(resp.responseText);
+							if (result.return_status == 'success') {
+								store_grid_admin_user.reload();
+								window_add_admin_user.close();
+								Ext.Msg.show({
+									title : '消息',
+									msg : result.return_describe,
+									buttons : Ext.Msg.YES,
+									icon : Ext.Msg.INFO
+								});
+							} else {
+								Ext.Msg.show({
+									title : '错误',
+									msg : result.return_describe,
+									buttons : Ext.Msg.YES,
+									icon : Ext.Msg.ERROR
+								});
+							}
+						}
+					});
+				},
+			}, {
+				text : '重置',
+				handler : function() {
+					alert('sa');
+					Ext.getCmp('input_add_admin_user_name').setValue('');
+					Ext.getCmp('input_add_admin_user_password').setValue('');
+					Ext.getCmp('input_add_admin_user_type').setValue('');
+				}
+			} ]
+		});
+		window_add_admin_user.show();
+	}
+	//--修改用户窗口
+	function action_open_modify_admin_user(user_id) {
+		Ext.Ajax.request({
+			url : '/ccdms/initModifyAdminUser.do',
+			params : {
+				admin_user_id : user_id
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					window_modify_admin_user = Ext.create('Ext.window.Window', {
+						title : '修改用户信息',
+						width : 400,
+						layout : 'form',
+						modal : true,
+						buttonAlign : 'center',
+						bodyPadding : 10,
+						items : [ {
+							xtype : 'textfield',
+							id : 'input_modify_admin_user_name',
+							fieldLabel : '用户',
+							allowBlank : false,
+							value : result.return_describe.admin_user_name,
+							readOnly : true,
+						}, {
+							xtype : 'textfield',
+							id : 'input_modify_admin_user_password',
+							fieldLabel : '密码',
+							allowBlank : false,
+							value : result.return_describe.admin_user_password,
+						}, {
+							xtype : 'combo',
+							id : 'input_modify_admin_user_type',
+							fieldLabel : '类型',
+							allowBlank : false,
+							editable : false,
+							queryMode : 'local',
+							displayField : 'name',
+							valueField : 'abbr',
+							value : result.return_describe.admin_user_type,
+							store : store_admin_user_type,
+						}, {
+							xtype : 'combo',
+							id : 'input_modify_admin_user_status',
+							fieldLabel : '状态',
+							allowBlank : false,
+							editable : false,
+							queryMode : 'local',
+							displayField : 'name',
+							valueField : 'abbr',
+							value : result.return_describe.admin_user_status,
+							store : store_admin_user_status,
+						} ],
+						buttons : [ {
+							text : '修改',
+						}, {
+							text : '取消',
+						} ],
+					});
+					window_modify_admin_user.show();
+				}
+			}
+		});
+	}
+	//--
+	function action_delete_admin_user(user_id) {
+		Ext.Msg.confirm('提示', '删除用户将会删除与用户相关的其他信息！是否确定删除？', function(btn) {
+			if (btn == 'yes') {
+				Ext.Ajax.request({
+					url : '/ccdms/deleteAdminUser.do',
+					params : {
+						admin_user_id : user_id
+					},
+					success : function(resp, opts) {
+						var result = Ext.decode(resp.responseText);
+						if (result.return_status == 'success') {
+							store_grid_admin_user.reload();
+							Ext.Msg.show({
+								title : '消息',
+								msg : '删除成功!',
+								buttons : Ext.Msg.YES,
+								icon : Ext.Msg.INFO
+							});
+						} else {
+							Ext.Msg.show({
+								title : '错误',
+								msg : '删除失败!',
+								buttons : Ext.Msg.YES,
+								icon : Ext.Msg.ERROR
+							});
+						}
+					}
+				});
+			}
+		});
+	}
+	
+	//权限分配
+	function open_manage_task_user_window(id) {
+		store_module_group_name = Ext.create('Ext.data.Store', {
+			model : 'model_admin_module_group',
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/allModuleGroupName.do?admin_user_id='+id,
+				reader : {
+					type : 'json',
+					root : 'rows',
+				}
+			}
+		});
+		
+		var window_user_authority = Ext.create('Ext.window.Window', {
+			title : '权限分配',
+			width : 400,
+			height : 300,
+			layout : 'fit',
+			modal : true,
+			items : [{
+				xtype : 'grid',
+				store : store_module_group_name,
+				columnLines : true,
+				loadMask : true,
+				columns : [{
+					text : '模块组',
+					dataIndex : 'module_group_name',
+					flex : 1,
+				}, {
+					text : '操作',
+					align : 'right',
+					flex : 1,
+					renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+						var str = "";
+						if(record.data["module_status"] == 1) {
+							str = "<a href='#' style='color:green' onClick=ajax_del_form_module_group("+ record.data["id"] +","+ id +")>取消</a>&nbsp;";
+						}else {
+							str = "<a href='#' style='color:red' onClick=ajax_add_to_module_group("+ record.data["id"] +","+ id +")>授权</a>&nbsp;";
+						}
+						return str;
+					}
+				} ],
+			}],
+		}).show();
+	}
+	
+	//授权
+	function ajax_add_to_module_group(group_id, user_id) {
+		Ext.Ajax.request({
+			url : '/ccdms/addAdminUserAuthority.do',
+			params : {
+				'module_group_id' : group_id,
+				'admin_user_id' : user_id,
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					store_module_group_name.reload();
+				}
+			}
+		});
+	}
+	
+	//取消
+	function ajax_del_form_module_group(group_id, user_id) {
+		Ext.Ajax.request({
+			url : '/ccdms/delAdminUserAuthority.do',
+			params : {
+				'module_group_id' : group_id,
+				'admin_user_id' : user_id,
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					store_module_group_name.reload();
+				}
+			}
+		});
+	}
+</script>
+</head>
+<body>
+
+</body>
+</html>

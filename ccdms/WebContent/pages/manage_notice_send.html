@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/ccdms/js/timeout.js"></script>
+<script type="text/javascript">
+	
+	var viewport_main;
+	var grid_notice_message;
+	var store_grid_notice_message;
+	var window_add_notice_message;
+	var window_modify_notice_message;
+	var window_search_notice_message;
+	//--
+	Ext.define('model_notice_message', {
+		extend : 'Ext.data.Model',
+		fields : [ {
+			name : 'id',
+			type : 'int'
+		}, {
+			name : 'notice_title',
+			type : 'string'
+		}, {
+			name : 'notice_content',
+			type : 'string'
+		}, {
+			name : 'notice_create_time',
+			type : 'string'
+		} ]
+	});
+	//--
+	store_grid_notice_message = Ext.create('Ext.data.Store', {
+		model : 'model_notice_message',
+		autoLoad : false,
+		proxy : {
+			type : 'ajax',
+			url : '/ccdms/listNoticeMessage.do',
+			reader : {
+				type : 'json',
+				root : 'rows',
+				totalProperty : 'total'
+			}
+		}
+	});
+	//--
+	Ext.onReady(function() {
+		grid_notice_message = Ext.create('Ext.grid.Panel', {
+			title : '通知信息',
+			store : store_grid_notice_message,
+			columnLines : true,
+			rowLines : true,
+			loadMask : true,
+			columns : [ {
+				text : '标题',
+				dataIndex : 'notice_title',
+			}, {
+				text : '内容',
+				dataIndex : 'notice_content',
+			}, {
+				text : '创建时间',
+				dataIndex : 'notice_create_time',
+			}, {
+				text : '操作',
+				sortable : false,
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = '';
+					str += '<a href="#" onClick="action_open_modify_notice_message(' + record.data["id"] + ')">修改</a>&nbsp;&nbsp;';
+					str += '<a href="#" onClick="action_delete_notice_message( ' + record.data["id"] + ' )">删除</a>';
+					return str;
+				}
+			} ],
+			bbar : Ext.create('Ext.toolbar.Paging', {
+				store : store_grid_notice_message,
+				displayInfo : true
+			}),
+			tools : [ {
+				type : 'plus',
+				handler : function() {
+					action_open_add_notice_message_window();
+				}
+			}, {
+				type : 'search',
+				handler : function() {
+
+				}
+			} ],
+		});
+		store_grid_notice_message.load();
+		grid_notice_message.show();
+		//--
+		viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_notice_message ],
+		});
+	});
+	//--添加用户窗口
+	function action_open_add_notice_message_window() {
+		window_add_notice_message = Ext.create('Ext.window.Window', {
+			title : '添加通知信息',
+			width : 400,
+			layout : 'form',
+			modal : true,
+			buttonAlign : 'center',
+			bodyPadding : 10,
+			items : [ {
+				xtype : 'textfield',
+				id : 'input_add_notice_title',
+				fieldLabel : '标题',
+				allowBlank : false
+			}, {
+				xtype : 'textfield',
+				id : 'input_add_notice_content',
+				fieldLabel : '内容',
+				allowBlank : false
+			} ],
+			buttons : [ {
+				text : '添加',
+				handler : function() {
+					Ext.Ajax.request({
+						url : '/ccdms/addNoticeMessage.do',
+						params : {
+							notice_title : Ext.getCmp('input_add_notice_title').getValue(),
+							notice_content : Ext.getCmp('input_add_notice_content').getValue()
+						},
+						success : function(resp, opts) {
+							var result = Ext.decode(resp.responseText);
+							if (result.return_status == 'success') {
+								store_grid_notice_message.reload();
+								window_add_notice_message.close();
+								Ext.Msg.show({
+									title : '消息',
+									msg : result.return_describe,
+									buttons : Ext.Msg.YES,
+									icon : Ext.Msg.INFO
+								});
+							} else {
+								Ext.Msg.show({
+									title : '错误',
+									msg : result.return_describe,
+									buttons : Ext.Msg.YES,
+									icon : Ext.Msg.ERROR
+								});
+							}
+						}
+					});
+				},
+			}, {
+				text : '重置',
+				handler : function() {
+					Ext.getCmp('input_add_notice_title').setValue('');
+					Ext.getCmp('input_add_notice_content').setValue('');
+				}
+			} ]
+		});
+		window_add_notice_message.show();
+	}
+	//--修改用户窗口
+	function action_open_modify_notice_message(notice_id) {
+		Ext.Ajax.request({
+			url : '/ccdms/initModifyNoticeMessage.do',
+			params : {
+				notice_id : notice_id
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					window_modify_notice_message = Ext.create('Ext.window.Window', {
+						title : '修改通知信息',
+						width : 400,
+						layout : 'form',
+						modal : true,
+						buttonAlign : 'center',
+						bodyPadding : 10,
+						items : [ {
+							xtype : 'textfield',
+							id : 'input_modify_notice_title',
+							fieldLabel : '标题',
+							allowBlank : false,
+							value : result.return_describe.notice_title,
+							readOnly : true,
+						}, {
+							xtype : 'textfield',
+							id : 'input_modify_notice_content',
+							fieldLabel : '内容',
+							allowBlank : false,
+							value : result.return_describe.notice_content,
+						} ],
+						buttons : [ {
+							text : '修改',
+							handler : function() {
+								Ext.Ajax.request({
+									url : '/ccdms/modifyNoticeMessage.do',
+									params : {
+										notice_id : notice_id,
+										notice_title : Ext.getCmp('input_modify_notice_title').getValue(),
+										notice_content : Ext.getCmp('input_modify_notice_content').getValue()
+									},
+									success : function(resp, opts) {
+										var result = Ext.decode(resp.responseText);
+										if (result.return_status == 'success') {
+											store_grid_notice_message.reload();
+											window_modify_notice_message.close();
+											Ext.Msg.show({
+												title : '消息',
+												msg : result.return_describe,
+												buttons : Ext.Msg.YES,
+												icon : Ext.Msg.INFO
+											});
+										} else {
+											Ext.Msg.show({
+												title : '错误',
+												msg : result.return_describe,
+												buttons : Ext.Msg.YES,
+												icon : Ext.Msg.ERROR
+											});
+										}
+									}
+								});
+							},
+						} ],
+					});
+					window_modify_notice_message.show();
+				}
+			}
+		});
+	}
+	//--
+	function action_delete_notice_message(notice_id) {
+		Ext.Msg.confirm('提示', '是否确定删除？', function(btn) {
+			if (btn == 'yes') {
+				Ext.Ajax.request({
+					url : '/ccdms/deleteNoticeMessage.do',
+					params : {
+						notice_id : notice_id
+					},
+					success : function(resp, opts) {
+						var result = Ext.decode(resp.responseText);
+						if (result.return_status == 'success') {
+							store_grid_notice_message.reload();
+							Ext.Msg.show({
+								title : '消息',
+								msg : '删除成功!',
+								buttons : Ext.Msg.YES,
+								icon : Ext.Msg.INFO
+							});
+						} else {
+							Ext.Msg.show({
+								title : '错误',
+								msg : '删除失败!',
+								buttons : Ext.Msg.YES,
+								icon : Ext.Msg.ERROR
+							});
+						}
+					}
+				});
+			}
+		});
+	}
+</script>
+</head>
+<body></body>
+</html>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+
+	<welcome-file-list>
+		<welcome-file>/pages/frame_login.html</welcome-file>
+	</welcome-file-list>
+	<filter>
+		<filter-name>struts</filter-name>
+		<filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>struts</filter-name>
+		<url-pattern>*.do</url-pattern>
+	</filter-mapping>
+	<context-param>
+		<param-name>records_virtual_path</param-name>
+		<param-value>/records</param-value>
+	</context-param>
+	<context-param>
+		<param-name>records_real_path</param-name>
+		<param-value>Z:/</param-value>
+	</context-param>
+	
+	<!-- 启动时扫描数据库执行新任务 -->
+	<servlet>
+		<servlet-name>thread_run</servlet-name>
+		<servlet-class>com.helphand.ccdms.thread.servlet_thread_run</servlet-class>
+		<load-on-startup>2000</load-on-startup>
+	</servlet>
+	
+	 <servlet-mapping>
+  		<servlet-name> thread_run </servlet-name>               
+ 		 <url-pattern>/trun</url-pattern>                   <!--映射的url路径 -->
+	</servlet-mapping> 
+	
+	<session-config>
+		<session-timeout>30</session-timeout>
+	</session-config>
+	
+	<!-- 每天定时生成指定报表 -->
+	<listener>
+ 		<listener-class>
+     	  com.helphand.ccdms.thread.MyListener
+ 		</listener-class>
+	</listener>
+	
+</web-app>

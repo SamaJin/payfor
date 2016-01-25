@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript">
+	var viewport_main;
+	var toolbar_search;
+	var grid_report;
+	
+	var store_report_name_data;
+	var result_model="";
+	var store_report_column_data;
+	var store_script_options_data;
+	
+	//初始化
+	Ext.onReady(function() {
+		Ext.define('model_report_name', {
+			extend : 'Ext.data.Model',
+			fields : [{
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'script_id',
+				type : 'int',
+			}, {
+				name : 'script_name',
+				type : 'string',
+			}],
+		});
+		store_report_name_data = Ext.create('Ext.data.Store', {
+			model : model_report_name,
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/listReportName.do',
+				reader : {
+					type : 'json',
+					root : 'rows',
+				}
+			}
+		});
+		
+		init_search();
+		grid_report = Ext.create('Ext.grid.Panel', {
+			tbar : toolbar_search,
+		    columns : [],
+		});
+		
+		viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_report ],
+			renderTo : Ext.getBody(),
+		});
+		
+	});
+	//搜索栏
+	function init_search() {
+		Ext.define('model_script_options', {
+			extend : 'Ext.data.Model',
+			fields : [{
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'describe',
+				type : 'string',
+			}],
+		});
+		store_script_options_data = Ext.create('Ext.data.Store', {
+			model : model_script_options,
+			autoLoad : false,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/listScriptOptions.do',
+				reader : {
+					type : 'json',
+					root : 'rows',
+				}
+			}
+		});
+		
+		toolbar_search=Ext.create('Ext.toolbar.Toolbar',{
+			items:[
+			    '脚本名称:', {
+			    	xtype : 'combo',
+			    	id : 'input_script',
+			    	displayField : 'script_name',
+					valueField : 'id',
+					queryMode: 'local',
+					store : store_report_name_data,
+					flex : 1,
+					onChange : function(value, beforeValue) {
+						store_script_options_data.on('beforeload', function(store) {
+							Ext.apply(store.proxy.extraParams, {
+								'script_id' : value,
+							});
+						});
+						Ext.getCmp('input_list_result').setValue("");
+						store_script_options_data.reload();
+					},
+					listeners : {
+	                    beforequery : function(e){
+	                    	var combo = e.combo;
+	                		if(!e.forceAll){
+	                			var value = e.query;
+	                			combo.store.filterBy(function(record,id){
+	                				var text = record.get(combo.displayField);
+	                				return (text.indexOf(value)!=-1);
+	                			});
+	                			combo.expand();
+	                			return false;
+	                		}
+	                    }
+	                }
+			    }, '执行结果:', {
+			    	xtype : 'combo',
+			    	id : 'input_list_result',
+			    	displayField : 'describe',
+					valueField : 'describe',
+					store : store_script_options_data,
+					queryMode: 'local',
+					flex : 1,
+					listeners : {
+	                    beforequery : function(e){
+	                    	var combo = e.combo;
+	                		if(!e.forceAll){
+	                			var value = e.query;
+	                			combo.store.filterBy(function(record,id){
+	                				var text = record.get(combo.displayField);
+	                				return (text.indexOf(value)!=-1);
+	                			});
+	                			combo.expand();
+	                			return false;
+	                		}
+	                    }
+	                }
+			    }, '工号:', {
+			    	xtype : 'field',
+			    	id : 'input_agent_id',
+			    	width : 60,
+			    }, '号码:', {
+			    	xtype : 'field',
+			    	id : 'input_callout_phone',
+			    	width : 110,
+			    },'日期:', {
+			    	xtype : 'datefield',
+			    	id: 'input_start_date',
+			    	format : 'Y-m-d',
+			    	flex : 1,
+			    }, '至', {
+			    	xtype : 'datefield',
+			    	id: 'input_end_date',
+			    	format : 'Y-m-d',
+			    	flex : 1,
+			    }, {
+			    	text:'搜索',
+			    	handler:function(){
+						search();
+					}
+			    }, {
+			    	text:'导出EXCEL',
+			    	handler:function(){
+			    		var script_id = Ext.getCmp('input_script').getValue();
+						var agent_id = Ext.getCmp('input_agent_id').getValue();
+						var start_date = Ext.getCmp('input_start_date').getValue();
+						var end_date = Ext.getCmp('input_end_date').getValue();
+						var callout_phone = Ext.getCmp('input_callout_phone').getValue();
+						start_date = Ext.util.Format.date(start_date, 'Y-m-d');
+						end_date = Ext.util.Format.date(end_date, 'Y-m-d');
+						var options = Ext.getCmp('input_list_result').getValue();
+						
+						var param = "?script_id="+script_id;
+						param += "&agent_id="+agent_id;
+						param += "&start_date="+start_date;
+						param += "&end_date="+end_date;
+						param += "&callout_phone="+callout_phone;
+						param += "&options="+encodeURI(encodeURI(options));
+						
+						if(script_id != null && script_id != "") {
+							window.location.href = "/ccdms/downloadCountExcel.do"+param;
+						}
+					}
+			    }
+			],
+		});
+	}
+	//动态生成页面
+	function search(){
+		Ext.Ajax.request({
+			url : '/ccdms/countReportColumn.do',
+			params : {
+				'script_id' : Ext.getCmp('input_script').getValue(),
+			},
+			success : function(response) {
+				result_model = response.responseText;
+				show_body();
+			},
+		});
+	}
+	//显示页面
+	function show_body() {
+		Ext.define('model_report_column', {
+			extend : 'Ext.data.Model',
+			fields : Ext.decode(result_model).modelBeanList,
+		});
+		
+		var script_id = Ext.getCmp('input_script').getValue();
+		var agent_id = Ext.getCmp('input_agent_id').getValue();
+		var start_date = Ext.getCmp('input_start_date').getValue();
+		var end_date = Ext.getCmp('input_end_date').getValue();
+		var callout_phone = Ext.getCmp('input_callout_phone').getValue();
+		start_date = Ext.util.Format.date(start_date, 'Y-m-d');
+		end_date = Ext.util.Format.date(end_date, 'Y-m-d');
+		var options = Ext.getCmp('input_list_result').getValue();
+
+		/* var params = "?script_id=" + script_id;//第一个参数
+		params += "&agent_id="+agent_id;
+		params += "&start_date="+start_date;
+		params += "&end_date="+end_date;
+		params += "&callout_phone="+callout_phone;
+		params += "&options="+options; */
+		
+		function init_store_report_column_data() {
+			try{
+				store_report_column_data = Ext.create('Ext.data.Store', {
+					pageSize : 20,
+					model : model_report_column,
+					autoLoad : true,
+					proxy : {
+						type : 'ajax',
+						//url : '/ccdms/listReportData.do'+params,
+						url : '/ccdms/countReportData.do',
+						actionMethods: {
+					        read : 'post'
+					    },
+					    extraParams : {
+					    	'script_id'     : script_id,
+					    	'agent_id'      : agent_id,
+					    	'start_date'    : start_date,
+					    	'end_date'      : end_date,
+					    	'callout_phone' : callout_phone,
+					    	'options'       : options,
+					    },
+						reader : {
+							type : 'json',
+							root : 'rows',
+							totalProperty : 'total'
+						}
+					}
+				});
+			}catch (e) {
+				
+			}
+		}
+		
+		
+		//主界面
+		init_store_report_column_data();
+		grid_report = Ext.create('Ext.grid.Panel', {
+			tbar : toolbar_search,
+			stripeRows : true,
+			store : store_report_column_data,
+			columnLines : true,
+			loadMask : true,
+			columns : Ext.decode(result_model).columnBeanList,
+			bbar : Ext.create('Ext.toolbar.Paging', {
+				store : store_report_column_data,
+				displayInfo : true,
+			}),
+		});
+		//入口
+		viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_report ],
+			renderTo : Ext.getBody(),
+		});
+	}
+</script>
+</head>
+<body></body>
+</html>

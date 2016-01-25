@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_new_recording_check_task" extends="interceptors" namespace="/">
+		<default-interceptor-ref name="stack_check_user"></default-interceptor-ref>
+		<action name="initNewRecordingCheck" class="com.helphand.ccdms.actions.manage_new_recording_check" method="init_recording_check">
+			<result>/pages/manage_new_recording_check.html</result>
+		</action>
+		<action name="initRecordingCheckJiangxi" class="com.helphand.ccdms.actions.manage_recording_check" method="init_recording_check">
+			<result>/pages/manage_recording_check_jiangxi.html</result>
+		</action>
+		
+		<action name="listNewRecordingCheckResult" class="com.helphand.ccdms.actions.manage_new_recording_check" method="list_recording_check_result">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="infoNewCommonsRecordsList" class="com.helphand.ccdms.actions.manage_new_recording_check" method="info_commons_records_list">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="saveNewRecordingCheckResult" class="com.helphand.ccdms.actions.manage_new_recording_check" method="save_recording_check_result1">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="delNewRecordingCheckResult" class="com.helphand.ccdms.actions.manage_new_recording_check" method="del_recording_check_result">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="infoNewRecordingCheckResult" class="com.helphand.ccdms.actions.manage_new_recording_check" method="info_recording_check_result">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="listNewCheckAdminUser" class="com.helphand.ccdms.actions.manage_new_recording_check" method="list_check_admin_user">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="execNewRecheckResult" class="com.helphand.ccdms.actions.manage_new_recording_check" method="exec_recheck_result">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="modifyNewCheckStatus" class="com.helphand.ccdms.actions.manage_new_recording_check" method="modify_check_status">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="checkNewAndRecheck" class="com.helphand.ccdms.actions.manage_new_recording_check" method="check_and_recheck">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="downloadNewCheckResult" class="com.helphand.ccdms.actions.manage_new_recording_check" method="download_check_result">
+		</action>
+	</package>
+</struts>

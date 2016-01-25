@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_report" extends="interceptors" namespace="/">
+		<default-interceptor-ref name="stack_check_user"></default-interceptor-ref>
+		<action name="initReportList" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="init_report_list">
+			<result>/pages/eaphelp/manage_report_list.html</result>
+		</action>
+		
+		<action name="listReportName" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="list_report_name">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="listScriptOptions" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="list_script_options">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="getReportColumn" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="get_report_column">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="listReportData" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="list_report_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="downloadExcel" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="download_excel">
+		</action>
+		
+		
+		<action name="initCountReport" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="init_count_report">
+			<result>/pages/eaphelp/manage_report_count.html</result>
+		</action>
+		<action name="saveCountDate" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="save_count_date">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="countReportData" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="count_report_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+			
+		<action name="downloadCountExcel" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="download_count_excel">
+		</action> 
+		<action name="initCountReportDataAgent" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="init_count_report_data_agent">
+			<result>/pages/eaphelp/manage_report_count_agent.html</result>
+		</action>		
+		<action name="countReportColumnAgent" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="count_report_column_agent">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>		
+		<action name="countReportDataAgent" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="count_report_data_agent">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>	
+	</package>
+</struts>

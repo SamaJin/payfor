@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_authentication" extends="interceptors"
+		namespace="/">
+		<action name="systemLogin" class="com.helphand.ccdms.actions.manage_authentication"
+			method="system_login">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+
+		<action name="systemLogout" class="com.helphand.ccdms.actions.manage_authentication"
+			method="system_logout">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="initSystemMenu" class="com.helphand.ccdms.actions.manage_authentication"
+			method="init_system_menu">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="initSystemIndex" class="com.helphand.ccdms.actions.manage_authentication"
+			method="init_system_index">
+			<result name="success">/pages/frame_main.html</result>
+		</action>
+	</package>
+</struts>

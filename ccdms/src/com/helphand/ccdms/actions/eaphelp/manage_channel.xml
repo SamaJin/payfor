@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_channel" extends="interceptors" namespace="/">
+		<default-interceptor-ref name="stack_check_user"></default-interceptor-ref>
+		<action name="initChannelList" class="com.helphand.ccdms.actions.eaphelp.manage_channel" method="init_channel_list">
+			<result>/pages/eaphelp/manage_channel_list.html</result>
+		</action>
+		<action name="initChannelDayList" class="com.helphand.ccdms.actions.eaphelp.manage_channel" method="init_channel_day_list">
+			<result>/pages/eaphelp/manage_channel_day.html</result>
+		</action>
+		
+		<action name="listCalloutChannel" class="com.helphand.ccdms.actions.eaphelp.manage_channel" method="list_callout_channel">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="saveCalloutChannel" class="com.helphand.ccdms.actions.eaphelp.manage_channel" method="save_callout_channel">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="delCalloutChannel" class="com.helphand.ccdms.actions.eaphelp.manage_channel" method="del_callout_channel">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="onOffCalloutChannel" class="com.helphand.ccdms.actions.eaphelp.manage_channel" method="on_off_callout_channel">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="execCalloutChannel" class="com.helphand.ccdms.actions.eaphelp.manage_channel" method="exec_callout_channel">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="showCalloutNumb" class="com.helphand.ccdms.actions.eaphelp.manage_channel" method="show_callout_numb">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="getChannelNameList" class="com.helphand.ccdms.actions.eaphelp.manage_channel" method="get_channel_name_list">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="showChannelDayData" class="com.helphand.ccdms.actions.eaphelp.manage_channel" method="show_channel_day_data">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+	</package>
+</struts>

@@ -1,0 +1,431 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript">
+	var store_grid_channel;
+	var window_add_channel;
+	var store_grid_script;
+	var mask;
+
+	Ext.onReady(function() {
+		//实体对象（数据关联）--------------------------
+		Ext.define('model_store_grid_channel', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'script_id',
+				type : 'int',
+			}, {
+				name : 'channel_name',
+				type : 'string',
+			}, {
+				name : 'origcaller',
+				type : 'string',
+			}, {
+				name : 'caller',
+				type : 'string',
+			}, {
+				name : 'origcalled',
+				type : 'string',
+			}, {
+				name : 'called',
+				type : 'string',
+			}, {
+				name : 'issue',
+				type : 'int',
+			}, {
+				name : 'channel_status',
+				type : 'int',
+			} ]
+		});
+		Ext.define('model_store_grid_script', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'script_name',
+				type : 'string',
+			} ]
+		});
+		//-------------------------------------------
+		store_grid_channel = Ext.create('Ext.data.Store', {
+			model : model_store_grid_channel,
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/listCalloutChannel.do',
+				reader : {
+					type : 'json',
+					root : 'rows',
+					totalProperty : 'total'
+				}
+			}
+		});
+		store_grid_script = Ext.create('Ext.data.Store', {
+			pageSize : 20,
+			model : model_store_grid_script,
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/allScript.do',
+				reader : {
+					type : 'json',
+					root : 'rows',
+				}
+			}
+		});
+		//---------------------------------
+		var grid_channel = Ext.create('Ext.grid.Panel', {
+			title : '通道管理',
+			store : store_grid_channel,
+			columnLines : true,
+			rowLines : true,
+			loadMask : true,
+			columns : [ {
+				text : 'ID',
+				dataIndex : 'id',
+				width : 40,
+			}, {
+				text : '通道名称',
+				dataIndex : 'channel_name',
+				flex : 1,
+			}, {
+				text : '脚本ID',
+				dataIndex : 'script_id',
+				width : 100,
+			}, {
+				text : '源主叫',
+				dataIndex : 'origcaller',
+				width : 150,
+			}, {
+				text : '主叫',
+				dataIndex : 'caller',
+				width : 150,
+			}, {
+				text : '源被叫',
+				dataIndex : 'origcalled',
+				width : 150,
+			}, {
+				text : '被叫',
+				dataIndex : 'called',
+				width : 150,
+			}, {
+				text : '激活',
+				dataIndex : 'channel_status',
+				width : 100,
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = "";
+					if (record.data["channel_status"] == 1) {
+						str += "<font style='color:green'>已激活</font>";
+					} else {
+						str += "<font style='color:red'>未激活</font>";
+					}
+					return str;
+				}
+			}, {
+				text : '发布',
+				dataIndex : 'issue',
+				width : 100,
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = "";
+					if (record.data["issue"] == 1) {
+						str += "<font style='color:green'>已发布</font>";
+					} else {
+						str += "<font style='color:red'>未发布</font>";
+					}
+					return str;
+				}
+			}, {
+				text : '操作',
+				width : 150,
+				align : 'right',
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = '';
+					str += '<a href="#" onClick=show_callout_numb("'+record.data["channel_name"]+'",'+ record.data["called"] +')>剩余</a>&nbsp;';
+					str += '<a href="#" onClick="open_modify_script_name_window(' + record.data["id"] 
+						+ ',\'' + record.data["channel_name"] + '\','+ record.data["script_id"] +')">修改</a>&nbsp;';
+					if (record.data["issue"] == 1) {
+						if(record.data["channel_status"] == 0) {
+							str += '<a href="#" onClick="action_on_off_channel(' + record.data["id"] 
+								+ ',\'' + record.data["channel_name"] + '\', 1)">激活</a>&nbsp;';
+						} else {
+							str += '<a href="#" onClick="action_on_off_channel(' + record.data["id"] 
+								+ ',\'' + record.data["channel_name"] + '\', 0)">暂停</a>&nbsp;';
+						}
+					} else {
+						str += '<a href="#" onClick="action_delete_channel(' + record.data["id"] 
+							+ ',\'' + record.data["channel_name"] + '\')">删除</a>&nbsp;';
+						str += '<a href="#" onClick="action_release_channel(' + record.data["id"] 
+							+ ',\'' + record.data["channel_name"] + '\')">发布</a>&nbsp;';
+					}
+					return str;
+				}
+			} ],
+			bbar : Ext.create('Ext.toolbar.Paging', {
+				store : store_grid_channel,
+				displayInfo : true,
+			}),
+			tools : [ {
+				type : 'plus',
+				tooltip : '添加通道',
+				handler : function() {
+					window_add_channel = Ext.create('Ext.window.Window', {
+						title : '添加通道',
+						width : 350,
+						modal : true,
+						layout : 'form',
+						resizable : false,
+						bodyPadding : 10,
+						buttonAlign : 'center',
+						items : [ {
+							xtype : 'textfield',
+							id : 'input_channel_name',
+							fieldLabel : '通道名称',
+						}, {
+							xtype : 'combo',
+							id : 'input_script_id',
+							fieldLabel : '脚本',
+					    	displayField : 'script_name',
+							valueField : 'id',
+							queryMode : 'local',
+							store : store_grid_script,
+							listeners : {
+			                    beforequery : function(e){
+			                    	var combo = e.combo;
+			                		if(!e.forceAll){
+			                			var value = e.query;
+			                			combo.store.filterBy(function(record,id){
+			                				var text = record.get(combo.displayField);
+			                				return (text.indexOf(value)!=-1);
+			                			});
+			                			combo.expand();
+			                			return false;
+			                		}
+			                    }
+			                }
+						}, {
+							xtype : 'textfield',
+							id : 'input_origcaller',
+							fieldLabel : '源主叫',
+						}, {
+							xtype : 'textfield',
+							id : 'input_caller',
+							fieldLabel : '主叫',
+						}, {
+							xtype : 'textfield',
+							id : 'input_origcalled',
+							fieldLabel : '源被叫',
+						}, {
+							xtype : 'textfield',
+							id : 'input_called',
+							fieldLabel : '被叫',
+						} ],
+						buttons : [ {
+							text : '提交',
+							handler : function() {
+								Ext.Ajax.request({
+									url : '/ccdms/saveCalloutChannel.do',
+									params : {
+										'channel.channel_name' : Ext.getCmp('input_channel_name').getValue(),
+										'channel.script_id' : Ext.getCmp('input_script_id').getValue(),
+										'channel.origcaller' : Ext.getCmp('input_origcaller').getValue(),
+										'channel.caller' : Ext.getCmp('input_caller').getValue(),
+										'channel.origcalled' : Ext.getCmp('input_origcalled').getValue(),
+										'channel.called' : Ext.getCmp('input_called').getValue(),
+									},
+									success : function(resp, ops) {
+										var result = Ext.JSON.decode(resp.responseText);
+										if (result.resp == 'success') {
+											window_add_channel.close();
+											store_grid_channel.load();
+										} else {
+											alert(result.describe);
+										}
+									}
+								});
+							}
+						} ]
+					}).show();
+				},
+			} ],
+		});
+		//---------------------------------
+		var viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_channel ],
+		});
+		//遮罩效果
+		mask = new Ext.LoadMask(Ext.get(grid_channel.getEl()), {
+			msg : 'Please wait...',
+			removeMask : true,
+		});
+	});
+	
+	//删除
+	function action_delete_channel(id, channel_name) {
+		if(!confirm("是否删除：["+ channel_name +"]")) {
+			return;
+		}
+		
+		Ext.Ajax.request({
+			url : '/ccdms/delCalloutChannel.do',
+			params : {
+				'channel.id' : id,
+			},
+			success : function(resp, ops) {
+				var result = Ext.JSON.decode(resp.responseText);
+				if (result.resp == 'success') {
+					store_grid_channel.load();
+				} else {
+					alert(result.describe);
+				}
+			}
+		});
+	}
+	
+	//发布
+	function action_release_channel(id, channel_name) {
+		if(!confirm("是否发布：["+ channel_name +"]")) {
+			return;
+		}
+		
+		Ext.Ajax.request({
+			url : '/ccdms/execCalloutChannel.do',
+			params : {
+				'channel.id' : id,
+				'channel.issue' : 1,
+			},
+			success : function(resp, ops) {
+				var result = Ext.JSON.decode(resp.responseText);
+				if (result.resp == 'success') {
+					store_grid_channel.load();
+				} else {
+					alert(result.describe);
+				}
+			}
+		});
+	}
+	
+	//激活、暂停
+	function action_on_off_channel(id, channel_name, value) {
+		
+		var name = (value == 1 ? "激活" : "暂停");
+		if(!confirm("是否"+ name +"：["+ channel_name +"]")) {
+			return;
+		}
+		
+		Ext.Ajax.request({
+			url : '/ccdms/onOffCalloutChannel.do',
+			params : {
+				'channel.id' : id,
+				'channel.channel_status' : value,
+			},
+			success : function(resp, ops) {
+				var result = Ext.JSON.decode(resp.responseText);
+				if (result.resp == 'success') {
+					store_grid_channel.load();
+				} else {
+					alert(result.describe);
+				}
+			}
+		});
+	}
+	
+	//修改
+	function open_modify_script_name_window(id, channel_name, script_id) {
+		var window_modify_channel = Ext.create('Ext.window.Window', {
+			title : channel_name,
+			width : 350,
+			modal : true,
+			layout : 'form',
+			resizable : false,
+			bodyPadding : 10,
+			buttonAlign : 'center',
+			items : [ {
+				xtype : 'textfield',
+				id : 'input_channel_name',
+				fieldLabel : '通道名称',
+				value : channel_name,
+				readOnly : true,
+			}, {
+				xtype : 'combo',
+				id : 'input_script_id',
+				fieldLabel : '脚本',
+		    	displayField : 'script_name',
+				valueField : 'id',
+				queryMode: 'local',
+				store : store_grid_script,
+				value : script_id,
+				listeners : {
+                    beforequery : function(e){
+                    	var combo = e.combo;
+                		if(!e.forceAll){
+                			var value = e.query;
+                			combo.store.filterBy(function(record,id){
+                				var text = record.get(combo.displayField);
+                				return (text.indexOf(value)!=-1);
+                			});
+                			combo.expand();
+                			return false;
+                		}
+                    }
+                }
+			} ],
+			buttons : [ {
+				text : '提交',
+				handler : function() {
+					Ext.Ajax.request({
+						url : '/ccdms/saveCalloutChannel.do',
+						params : {
+							'channel.id' : id,
+							'channel.script_id' : Ext.getCmp('input_script_id').getValue(),
+						},
+						success : function(resp, ops) {
+							var result = Ext.JSON.decode(resp.responseText);
+							if (result.resp == 'success') {
+								window_modify_channel.close();
+								store_grid_channel.load();
+							} else {
+								alert(result.describe);
+							}
+						}
+					});
+				}
+			} ]
+		}).show();
+	}
+	
+	
+	//外呼剩余数据
+	function show_callout_numb(channel_name, called) {
+		mask.show();
+		alert(called);
+		Ext.Ajax.request({
+			url : '/ccdms/showCalloutNumb.do',
+			params : {
+				'channel.called' : called,
+			},
+			success : function(resp, ops) {
+				var result = Ext.JSON.decode(resp.responseText);
+				if (result.resp == 'success') {
+					mask.hide();
+					alert(channel_name+" 剩余量：[ "+ result.describe +" ]");
+				}else {
+					mask.hide();
+					alert(channel_name+" 剩余量获取失败");
+				}
+			}
+		});
+	}
+</script>
+</head>
+<body>
+</body>
+</html>

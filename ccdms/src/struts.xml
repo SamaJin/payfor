@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<constant name="struts.action.extension" value="do" />
+	<constant name="struts.allowed.action.names" value="[a-zA-Z0-9._!/\-]*"></constant>
+	<include file="struts-default.xml"></include>
+	<include file="com/helphand/ccdms/interceptors/interceptor.xml"></include>
+	<include file="com/helphand/ccdms/actions/manage_authentication.xml"></include>
+	<include file="com/helphand/ccdms/actions/manage_admin_user.xml"></include>
+	<include file="com/helphand/ccdms/actions/manage_admin_module.xml"></include>
+	<include file="com/helphand/ccdms/actions/manage_admin_module_group.xml"></include>
+	<include file="com/helphand/ccdms/actions/manage_record_data.xml"></include>
+	<include file="com/helphand/ccdms/actions/manage_recording_check.xml"></include>
+	<include file="com/helphand/ccdms/actions/manage_new_recording_check.xml"></include>
+	<include file="com/helphand/ccdms/actions/manage_report_rule.xml"></include>
+	<include file="com/helphand/ccdms/actions/manage_report_list.xml"></include>
+	<include file="com/helphand/ccdms/actions/manage_callin_order_logs.xml"></include>
+	<include file="com/helphand/ccdms/actions/manage_notice_send.xml"></include>
+	<include file="com/helphand/ccdms/actions/manage_new_record_data.xml"></include>
+	<include file="com/helphand/ccdms/actions/window_record_data.xml"></include>
+	
+	<!-- eaphelp -->
+	<include file="com/helphand/ccdms/actions/eaphelp/manage_script.xml"></include>
+	<include file="com/helphand/ccdms/actions/eaphelp/manage_channel.xml"></include>
+	<include file="com/helphand/ccdms/actions/eaphelp/manage_report.xml"></include>
+	<include file="com/helphand/ccdms/actions/eaphelp/manage_report_data.xml"></include>
+	<include file="com/helphand/ccdms/actions/eaphelp/window_report_data.xml"></include>
+	<include file="com/helphand/ccdms/actions/eaphelp/manage_agentidvname_team.xml"></include>
+</struts>

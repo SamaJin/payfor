@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="window_report_data" extends="json-default" namespace="/">
+		<action name="initWindow" class="com.helphand.ccdms.actions.eaphelp.manage_report_data" method="init_window">
+			<result type="redirectAction">windowReport</result>
+		</action>
+		<action name="windowReport" class="com.helphand.ccdms.actions.eaphelp.manage_report_data" method="window_report">
+			<result>/pages/eaphelp/window_report_data.jsp</result>
+		</action>
+	
+		<action name="listReportNameWindow" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="list_report_name">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="listCalloutResultWindow" class="com.helphand.ccdms.actions.eaphelp.manage_report_data" method="list_callout_result">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="listScriptOptionsWindow" class="com.helphand.ccdms.actions.eaphelp.manage_report" method="list_script_options">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="showScriptDataInfoWindow" class="com.helphand.ccdms.actions.eaphelp.manage_script" method="show_script_data_info">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="saveCalloutResultWindow" class="com.helphand.ccdms.actions.eaphelp.manage_report_data" method="save_callout_result">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+	</package>
+</struts>

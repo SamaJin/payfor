@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_admin_module_group" extends="interceptors" namespace="/">
+		<default-interceptor-ref name="stack_check_user"></default-interceptor-ref>
+		<action name="initListAdminModuleGroup" class="com.helphand.ccdms.actions.manage_admin_module_group" method="init_list_admin_module_group">
+			<result>/pages/manage_admin_module_group.html</result>
+		</action>
+		<action name="listAdminModuleGroup" class="com.helphand.ccdms.actions.manage_admin_module_group" method="list_admin_module_group">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="saveAdminModuleGroup" class="com.helphand.ccdms.actions.manage_admin_module_group" method="save_admin_module_group">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="delAdminModuleGroup" class="com.helphand.ccdms.actions.manage_admin_module_group" method="del_admin_module_group">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="listAdminModuleAuthority" class="com.helphand.ccdms.actions.manage_admin_module_group" method="list_admin_module_authority">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="addToAdminGroup" class="com.helphand.ccdms.actions.manage_admin_module_group" method="add_to_admin_group">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		<action name="delFromAdminGroup" class="com.helphand.ccdms.actions.manage_admin_module_group" method="del_from_admin_group">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+	</package>
+</struts>

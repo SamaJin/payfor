@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/ccdms/js/timeout.js"></script>
+<script type="text/javascript" src="/ccdms/js/UX_DateTimeField.js"></script>
+<script type="text/javascript">
+	
+	Ext.onReady(function() {
+		Ext.define('model_channel_name', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'channel_name',
+				type : 'string',
+			}, {
+				name : 'called',
+				type : 'string',
+			} ]
+		});
+		//--
+		var channel_name_store = Ext.create('Ext.data.Store', {
+			model : 'model_channel_name',
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/getChannelNameList.do',
+				reader : {
+					type : 'json',
+					root : 'rows',
+				}
+			}
+		});
+		//
+		Ext.define('model_channel_type', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'customer_name',
+				type : 'string',
+			}, {
+				name : 'numb',
+				type : 'string',
+			} ]
+		});
+		//--
+		var channel_type_store = Ext.create('Ext.data.Store', {
+			model : 'model_channel_type',
+			autoLoad : false,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/showChannelDayData.do',
+				reader : {
+					type : 'json',
+					root : 'rows'
+				}
+			}
+		});
+		//--
+		var toolbar_search = Ext.create('Ext.toolbar.Toolbar', {
+			items : [ {
+				xtype : 'combo',
+				id : 'input_channel_name',
+				fieldLabel : '&nbsp;通道名称',
+				store : channel_name_store,
+				displayField : 'channel_name',
+				valueField : 'called',
+				labelWidth : 60,
+				queryMode : 'local',
+				listeners : {
+                    beforequery : function(e){
+                    	var combo = e.combo;
+                		if(!e.forceAll){
+                			var value = e.query;
+                			combo.store.filterBy(function(record,id){
+                				var text = record.get(combo.displayField);
+                				return (text.indexOf(value)!=-1);
+                			});
+                			combo.expand();
+                			return false;
+                		}
+                    }
+                }
+			}, {
+				xtype : 'combo',
+				id : 'input_channel_type',
+				fieldLabel : '&nbsp;类型',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ 
+					    {"name" : "外呼量","value" : 0},
+					    {"name" : "接通量","value" : 1} 
+					]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				labelWidth : 60,
+				editable : false,
+				value : 0,
+			}, {
+				xtype : 'datetimefield',
+				id : 'input_start_time',
+				fieldLabel : '&nbsp;开始时间',
+				format : 'Y-m-d',
+				labelWidth : 60,
+				selectOnFocus : true,
+			}, {
+				xtype : 'datetimefield',
+				id : 'input_end_time',
+				fieldLabel : '&nbsp;结束时间',
+				format : 'Y-m-d',
+				labelWidth : 60,
+				selectOnFocus : true,
+			}, '->', {
+				text : '查询',
+				width : 50,
+				icon : '/ccdms/extui/resources/icons/magnifier.png',
+				handler : function() {
+					channel_type_store.on('beforeload', function(store) {
+						Ext.apply(store.proxy.extraParams, {
+							'channel.called' : Ext.getCmp('input_channel_name').getValue(),
+							'start_time' : Ext.getCmp('input_start_time').getRawValue(),
+							'end_time' : Ext.getCmp('input_end_time').getRawValue(),
+							'channel_type' : Ext.getCmp('input_channel_type').getValue(),
+						});
+					});
+					channel_type_store.reload();
+				}
+			} ],
+		});
+		
+		var grid_report_list = Ext.create('Ext.grid.Panel', {
+			tbar : toolbar_search,
+			stripeRows : true,
+			store : channel_type_store,
+			columnLines : true,
+			loadMask : true,
+			columns : [ {
+				text : "名称",
+				dataIndex : "customer_name",
+			}, {
+				text : "结果",
+				dataIndex : "numb",
+			} ],
+		});
+		
+		var viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_report_list ],
+		});
+	});
+	
+</script>
+</head>
+<body>
+</body>
+</html>

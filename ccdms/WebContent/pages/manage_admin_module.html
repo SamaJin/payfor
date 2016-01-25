@@ -1,0 +1,304 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="/ccdms/extui/resources/css/ext-all.css">
+<script type="text/javascript" src="/ccdms/extui/ext-all.js"></script>
+<script type="text/javascript" src="/ccdms/extui/locale/ext-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/ccdms/js/timeout.js"></script>
+<script type="text/javascript">
+	var admin_module_store;
+	var window_admin_module;
+	
+	Ext.onReady(function() {
+		//-------------------------------------
+		Ext.define('model_admin_module', {
+			extend : 'Ext.data.Model',
+			fields : [ {
+				name : 'id',
+				type : 'int',
+			}, {
+				name : 'parent_id',
+				type : 'int',
+			}, {
+				name : 'module_name',
+				type : 'string',
+			}, {
+				name : 'module_uri',
+				type : 'string',
+			}, {
+				name : 'module_type',
+				type : 'string',
+			}, {
+				name : 'module_describe',
+				type : 'string',
+			} ]
+		});
+		//-------------------------------------
+		admin_module_store = Ext.create('Ext.data.Store', {
+			model : 'model_admin_module',
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/listAdminModule.do',
+				reader : {
+					type : 'json',
+					root : 'rows',
+					totalProperty : 'total'
+				}
+			}
+		});
+		//-------------------------------------
+		var grid_admin_module = Ext.create('Ext.grid.Panel', {
+			title : '系统模块管理',
+			store : admin_module_store,
+			columnLines : true,
+			rowLines : true,
+			loadMask : true,
+			columns : [ {
+				text : '标识',
+				dataIndex : 'id',
+			}, {
+				text : '父节点',
+				dataIndex : 'parent_id',
+			}, {
+				text : '模块名称',
+				dataIndex : 'module_name',
+			}, {
+				text : '路径',
+				dataIndex : 'module_uri',
+			}, {
+				text : '类型',
+				dataIndex : 'module_type',
+			}, {
+				text : '描述',
+				dataIndex : 'module_describe',
+			}, {
+				text : '操作',
+				align : 'right',
+				sortable : false,
+				renderer : function(value, cellmeta, record, rowIndex, columnIndex, store) {
+					var str = "";
+					str += "<a href='#' onClick=ajax_modify_admin_module("+ record.data["id"] +")>修改</a>&nbsp;|&nbsp;";
+					str += "<a href='#' onClick=exec_del_admin_module("+ record.data["id"] +",'"+ record.data["module_name"] +"')>删除</a>";
+					return str;
+				}
+			} ],
+			bbar : Ext.create('Ext.toolbar.Paging', {
+				store : admin_module_store,
+				displayInfo : true,
+			}),
+			tools : [ {
+				type : 'plus',
+				handler : function() {
+					open_save_module_window();
+				}
+			}],
+		});
+		//入口
+		var viewport_main = Ext.create('Ext.container.Viewport', {
+			layout : 'fit',
+			items : [ grid_admin_module ],
+		});
+	});
+	
+	//添加信息窗口
+	function open_save_module_window(parent_id, module_name, module_uri, module_type, module_describe, id) {
+		//获取功能模块名字
+		var module_name_store = Ext.create('Ext.data.Store', {
+			model : 'model_admin_module',
+			autoLoad : true,
+			proxy : {
+				type : 'ajax',
+				url : '/ccdms/listAdminModuleName.do',
+				reader : {
+					type : 'json',
+					root : 'rows'
+				}
+			}
+		});
+		
+		window_admin_module = Ext.create('Ext.window.Window', {
+			title : '添加模块',
+			width : 400,
+			layout : 'form',
+			modal : true,
+			buttonAlign : 'center',
+			bodyPadding : 10,
+			items : [ {
+				xtype : 'hidden',
+				id : 'input_id',
+				value : id,
+			}, {
+				xtype : 'combo',
+				id : 'input_module_type',
+				fieldLabel : '类型',
+				store : Ext.create('Ext.data.Store', {
+					fields : [ 'name', 'value' ],
+					data : [ {
+						"name" : "功能模块",
+						"value" : "0",
+					}, {
+						"name" : "导航菜单",
+						"value" : "1",
+					} ]
+				}),
+				displayField : 'name',
+				valueField : 'value',
+				editable : false,
+				value : module_type,
+			}, {
+				xtype : 'combo',
+				id : 'input_parent_id',
+				fieldLabel : '父节点',
+				store : module_name_store,
+				displayField : 'module_name',
+				valueField : 'id',
+				editable : false,
+				value : parent_id,
+			}, {
+				xtype : 'textfield',
+				id : 'input_module_name',
+				fieldLabel : '模块名称',
+				allowBlank : false,
+				value : module_name,
+			}, {
+				xtype : 'textfield',
+				id : 'input_module_uri',
+				fieldLabel : '路径',
+				allowBlank : false,
+				value : module_uri,
+			}, {
+				xtype : 'textfield',
+				id : 'input_module_describe',
+				fieldLabel : '描述',
+				value : module_describe,
+			} ],
+			buttons : [ {
+				text : '保存',
+				handler : function() {
+					var parent_id = Ext.getCmp("input_parent_id").value;
+					var module_name = Ext.getCmp("input_module_name").value;
+					var module_uri = Ext.getCmp("input_module_uri").value;
+					var module_type = Ext.getCmp("input_module_type").value;
+					var module_describe = Ext.getCmp("input_module_describe").value;
+					var id = Ext.getCmp("input_id").value;
+					save_admin_module(parent_id,module_name,module_uri,module_type,module_describe,id);
+				},
+			}]
+		}).show();
+	}
+	
+	//保存
+	function save_admin_module(parent_id,module_name,module_uri,module_type,module_describe,id) {
+		Ext.Ajax.request({
+			url : '/ccdms/saveAdminModule.do',
+			params : {
+				'module_id' : id,
+				'parent_id' : parent_id,
+				'module_name' : module_name,
+				'module_type' : module_type,
+				'module_uri' : module_uri,
+				'module_describe' : module_describe,
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					admin_module_store.reload();
+					window_admin_module.close();
+					Ext.Msg.show({
+						title : '消息',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.INFO
+					});
+				} else {
+					Ext.Msg.show({
+						title : '错误',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.ERROR
+					});
+				}
+			}
+		});
+	}
+
+	//是否删除
+	function exec_del_admin_module(id, module_name) {
+		var question = "是否确定删除: ["+ module_name +"]";
+		Ext.Msg.show({
+			title : '消息',
+			msg : question,
+			buttons : Ext.Msg.YESNO,
+			icon : Ext.Msg.QUESTION,
+			fn : function(result) {
+				if(result == "yes") {
+					ajax_del_admin_module(id);
+				}
+			}
+		});
+	}
+	
+	//执行删除
+	function ajax_del_admin_module(id) {
+		Ext.Ajax.request({
+			url : '/ccdms/deleteAdminModule.do',
+			params : {
+				'module_id' : id,
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					admin_module_store.reload();
+					Ext.Msg.show({
+						title : '消息',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.INFO
+					});
+				} else {
+					Ext.Msg.show({
+						title : '错误',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.ERROR
+					});
+				}
+			}
+		});
+	}
+	
+	//修改
+	function ajax_modify_admin_module(id) {
+		Ext.Ajax.request({
+			url : '/ccdms/infoAdminModule.do',
+			params : {
+				'module_id' : id,
+			},
+			success : function(resp, opts) {
+				var result = Ext.decode(resp.responseText);
+				if (result.return_status == 'success') {
+					var bean = result.bean;
+					var parent_id = bean.parent_id;
+					var module_name = bean.module_name;
+					var module_uri = bean.module_uri;
+					var module_type = bean.module_type;
+					var module_describe = bean.module_describe;
+					open_save_module_window(parent_id,module_name,module_uri,module_type,module_describe,id);
+				}else {
+					Ext.Msg.show({
+						title : '错误',
+						msg : result.return_describe,
+						buttons : Ext.Msg.YES,
+						icon : Ext.Msg.ERROR
+					});
+				}
+			}
+		});
+	}
+</script>
+</head>
+<body>
+</body>
+</html>

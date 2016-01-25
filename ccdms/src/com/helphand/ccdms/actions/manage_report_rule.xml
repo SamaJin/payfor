@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="manage_report_rule" extends="interceptors" namespace="/">
+		<default-interceptor-ref name="stack_check_user"></default-interceptor-ref>
+		<action name="initReportRule" class="com.helphand.ccdms.actions.manage_report_rule" method="init_report_rule">
+			<result>/pages/manage_report_rule.html</result>
+		</action>
+		
+		<action name="listReportRule" class="com.helphand.ccdms.actions.manage_report_rule" method="list_report_rule">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="listReportRuleItem" class="com.helphand.ccdms.actions.manage_report_rule" method="list_report_rule_item">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="saveReportRule" class="com.helphand.ccdms.actions.manage_report_rule" method="save_report_rule">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="delReportRule" class="com.helphand.ccdms.actions.manage_report_rule" method="del_report_rule">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="saveReportRuleItem" class="com.helphand.ccdms.actions.manage_report_rule" method="save_report_rule_item">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+		
+		<action name="delReportRuleItem" class="com.helphand.ccdms.actions.manage_report_rule" method="del_report_rule_item">
+			<result type="json">
+				<param name="root">result_json</param>
+			</result>
+		</action>
+	</package>
+</struts>
