@@ -275,7 +275,9 @@
 			success : function(resp, opts) {
 				var result = Ext.decode(resp.responseText);
 				if (result.return_status == 'success') {
-					window.location.href = result.out_file_path;
+					  window.location.href = result.out_file_path;
+					//window.location.href = result.out_file_path;
+					//window.parent.frameLeft.location.href="172.1.1.171:8090/records/20150101/I-32481725_A10051_54a56e4d_40db.vox";
 				}
 			}
 		});
