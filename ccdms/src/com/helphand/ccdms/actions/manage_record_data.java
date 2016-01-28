@@ -611,7 +611,12 @@ public class manage_record_data extends ActionSupport {
 		String out_file_path = null;
 		try {
 			out_file_path = "";
-			//out_file_path += tools.get_init_param("records_virtual_path") + "/";
+			String boolen=file_path.substring(0,3);
+			if(!boolen.equals("ftp"))
+			{
+				out_file_path+="172.1.1.171:8090";
+				out_file_path += tools.get_init_param("records_virtual_path") + "/";
+			}
 			out_file_path += file_path;
 			result_json.put("return_status", "success");
 			result_json.put("out_file_path", out_file_path);
