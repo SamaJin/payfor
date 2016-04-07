@@ -3,6 +3,7 @@ package com.helphand.ccdms.actions.eaphelp;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.logging.Log;
@@ -10,6 +11,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import com.helphand.ccdms.beans.callout_tj_bean;
+import com.helphand.ccdms.beans.gz_pay_logs_bean;
 import com.helphand.ccdms.commons.common_tools;
 import com.helphand.ccdms.dbs.HibernateDAO;
 import com.helphand.ccdms.dbs.HibernatePageDemo;
@@ -62,6 +65,7 @@ public class manage_report_data extends ActionSupport {
 		return SUCCESS;
 	}
 
+	private JSONArray array_json=null;
 	//查询
 	public String list_callout_result() {
 		log.info("Entry manage_report_data[ list_callout_result()]");
@@ -69,7 +73,7 @@ public class manage_report_data extends ActionSupport {
 			callout_result = (callout_result == null ? new callout_result() : callout_result);
 			dbs_session = HibernateSessionFactory_cailing3_7.getSession();
 			dbs_transaction = dbs_session.beginTransaction();
-			hql = "from callout_result where 1=1";
+			hql = "  from callout_result where 1=1";
 			
 			//脚本ID
 			if(!tools.isEmpty(script_id)) {
@@ -98,16 +102,26 @@ public class manage_report_data extends ActionSupport {
 				hql += " and result_describe like '%;"+ options +";'";
 			}
 			
-			hql += " order by callout_time";
+			hql += "  group by result_describe,script_name,script_id";
 			log.info("exec hql : " + hql);
-			page_object = daos.select_pages(dbs_session, hql, page, limit, callout_result);
+			String hql_head = "select count(1) as nums,script_id,script_name,result_describe";
+			page_object = daos.select_sql_pages(dbs_session,hql_head, hql, page, limit);
 			page_object = page_object == null ? new HibernatePageDemo() : page_object;
 			list = page_object.getList();
-			list = (list == null ? new ArrayList<Object>() : list);
-			page_json = new HibernatePageJson();
-			page_json.setTotal(page_object.getTotal_record_count());
-			page_json.setRows(list);
-			result_json = JSONObject.fromObject(page_json);
+		    array_json = new JSONArray();
+			callout_tj_bean bean = null;
+			for (int i = 0; i < list.size(); i++) {
+				Object[] objs = (Object[])list.get(i);
+				bean = new callout_tj_bean();
+				bean.setNums(String.valueOf(objs[0]));
+				bean.setScript_id(String.valueOf(objs[1]));
+				bean.setScript_name(String.valueOf(objs[2]));
+				bean.setResult_describe(String.valueOf(objs[3]));
+				array_json.add(JSONObject.fromObject(bean));
+			}
+			result_json = new JSONObject();
+			result_json.put("total", page_object.getTotal_record_count());
+			result_json.put("rows", array_json);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
